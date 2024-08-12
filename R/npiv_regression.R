@@ -3,7 +3,7 @@ npiv_regression <- function(data,
                             treatment_col,
                             outcome_col,
                             id_col = NULL,
-                            alpha = c(0.10, 0.05, 0.01),
+                            alpha = c(0.05), # 0.1. 0.01
                             nx = 880,
                             nL = 9,
                             r = 4,
