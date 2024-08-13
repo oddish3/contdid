@@ -41,7 +41,8 @@ npiv_regression <- function(data,
   CJ <- c(0, cumsum(TJ))
 
   # Create grid for x
-  Xx <- seq(min(x), max(x), length.out = nx)
+  Xx <- seq(0, 1, length.out = nx)
+  Xx_sub <- Xx[Xx>0.01 & Xx<=0.99]
 
   # Compute basis functions
   compute_basis_functions <- function(x, nL, r, CJ, derivative = FALSE) {

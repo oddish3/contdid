@@ -44,7 +44,7 @@ dgp_function <- function(dgp) {
 }
 
 # Now, modify the gdata function to incorporate the dgp_function
-gdata <- function(n, dgp, prop_treated = 0.8) {
+gdata <- function(n, dgp, prop_treated = 0.5) {
   # browser()
   # Get the appropriate dist, func, and func_deriv based on the dgp value
   dgp_params <- dgp_function(dgp)

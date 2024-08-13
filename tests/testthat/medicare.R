@@ -2,6 +2,7 @@ rm(list=ls())
 load("/home/oddish3/Downloads/medicare1(1).RData")
 library(tidyverse)
 library(contdid)
+debugonce(npiv_regression)
 result <- npiv_regression(
   data = medicare1,
   treatment_col = "medicare_share_1983",
