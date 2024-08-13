@@ -85,6 +85,7 @@ npiv_regression <- function(data,
   hzast <- ucb_cv(Ltil, Lhat, Px, PP, PP, CJ, CJ, y, n, 1000, 0, alpha)
   dzast <- ucb_cv(Ltil, Lhat, Dx, PP, PP, CJ, CJ, y, n, 1000, 0, alpha)
 
+
   # Calculate ATT^o and TWFE
   data_full$binary <- as.integer(data_full[[treatment_col]] > 0)
   binarised <- tryCatch({
@@ -126,6 +127,14 @@ npiv_regression <- function(data,
     stop(paste("Error in binarised regression:", e$message))
   })
 
+  # Precalculate UCBs
+  adjustment_term <- thet * log(log(TJ[Llep + 1]))
+
+  ATT_upper_UCB <- hhat + (hzast + adjustment_term) * npiv_result$sigh
+  ATT_lower_UCB <- hhat - (hzast + adjustment_term) * npiv_result$sigh
+
+  ACR_upper_UCB <- dhat + (dzast + adjustment_term) * npiv_result_derivative$sigh
+  ACR_lower_UCB <- dhat - (dzast + adjustment_term) * npiv_result_derivative$sigh
 
   # Construct eta and compute its sample variance
   E_Y_D0 <- mean(data_full[[outcome_col]][data_full[[treatment_col]] == 0])
@@ -165,16 +174,33 @@ npiv_regression <- function(data,
 
   t_crit <- stats::qt(0.975, df=df)
 
-  ci_lower <- ACR_estimate - t_crit * se_ACR
-  ci_upper <- ACR_estimate + t_crit * se_ACR
+  ci_lower_ACR <- ACR_estimate - t_crit * se_ACR
+  ci_upper_ACR <- ACR_estimate + t_crit * se_ACR
 
   # Return results
+  # browser()
   list(
-    x = x, y = y, Xx = Xx, hhat = hhat, dhat = dhat,
-    sigh = sigh, sigd = sigd, hzast = hzast, dzast = dzast, thet = thet,
-    TJ = TJ, Llep = Llep, binarised = binarised,
-    ACR_estimate = ACR_estimate, se_ACR = se_ACR,
-    t_statistic = t_statistic, p_value_ACR = p_value_ACR,
-    ci_lower = ci_lower, ci_upper = ci_upper
+    x = x,
+    y = y,
+    Xx = Xx,
+    TJ = TJ,
+    Llep = Llep,
+    hhat = hhat,
+    sigh = sigh,
+    sigd = sigd,
+    hzast = hzast,
+    thet = thet,
+    binarised = binarised,
+    ATT_upper_UCB = ATT_upper_UCB,
+    ATT_lower_UCB = ATT_lower_UCB,
+    dzast = dzast,
+    ACR_estimate = ACR_estimate,
+    se_ACR = se_ACR,
+    t_statistic_ACR = t_statistic,
+    p_value_ACR = p_value_ACR,
+    ACR_upper_UCB = ACR_upper_UCB,
+    ACR_lower_UCB = ACR_lower_UCB,
+    ci_lower_ACR = ci_lower_ACR,
+    ci_upper_ACR = ci_upper_ACR
   )
 }
