@@ -44,8 +44,7 @@ dgp_function <- function(dgp) {
 }
 
 # Now, modify the gdata function to incorporate the dgp_function
-gdata <- function(n, dgp, prop_treated = 0.5) {
-  # browser()
+gdata <- function(n, dgp, prop_treated = 0.8, noise_sd = 0.5, index_sd = 1, unobs_het_sd = 1) {
   # Get the appropriate dist, func, and func_deriv based on the dgp value
   dgp_params <- dgp_function(dgp)
 
@@ -57,17 +56,23 @@ gdata <- function(n, dgp, prop_treated = 0.5) {
   dose[treatment == 1] <- dgp_params$dist(sum(treatment))
 
   # Generate indexes
-  index_base <- rnorm(n, mean = 100, sd = 10)  # Base index
-  index_unobs_het <- rnorm(n, mean = 0, sd = 5)  # Unobserved heterogeneity
+  index_base <- rnorm(n, mean = 100, sd = index_sd)  # Reduced SD for base index
+  index_unobs_het <- rnorm(n, mean = 0, sd = unobs_het_sd)  # Reduced SD for unobserved heterogeneity
 
   # Generate outcomes at time 1 (pre-treatment)
-  y1 <- index_base + index_unobs_het + rnorm(n, mean = 0, sd = 1)
+  y1 <- index_base + index_unobs_het + rnorm(n, mean = 0, sd = noise_sd)
 
   # Calculate treatment effect for treated units using the func function
   treatment_effect <- ifelse(treatment == 1, dgp_params$func(dose), 0)
 
+  # Implement local polynomial regression for smoothing treatment effect
+  if (sum(treatment) > 0) {
+    smooth_effect <- loess(treatment_effect[treatment == 1] ~ dose[treatment == 1], span = 0.75)
+    treatment_effect[treatment == 1] <- predict(smooth_effect)
+  }
+
   # Generate outcomes at time 2 (post-treatment)
-  y2 <- y1 + treatment_effect + rnorm(n, mean = 0, sd = 1)
+  y2 <- y1 + treatment_effect + rnorm(n, mean = 0, sd = noise_sd)
 
   # Calculate change in outcomes
   dy <- y2 - y1
@@ -95,19 +100,16 @@ gdata <- function(n, dgp, prop_treated = 0.5) {
     dose = dose
   )
 
-  # Create the list with additional information
-  info_list <- list(
-    pop_att = dgp_params$E_func,     # population ATT
-    samp_att = att,                  # sample ATT
-    est_att = observed_ate,          # estimated ATT
-    pop_acr = dgp_params$E_deriv,    # population ACR
-    est_acr = true_acr,              # estimated ACR
-    func_values = func_values,       # func evaluated over x_grid
-    func_deriv_values = func_deriv_values  # func_deriv evaluated over x_grid
-  )
-
-  # Return a list containing both the data frame and the list
-  return(list(data = df, info = info_list))
+  return(list(
+    data = df,
+    info = list(
+      pop_att = att,
+      obs_ate = observed_ate,
+      true_acr = true_acr,
+      func_values = func_values,
+      func_deriv_values = func_deriv_values
+    )
+  ))
 }
 
 # # # Run the function

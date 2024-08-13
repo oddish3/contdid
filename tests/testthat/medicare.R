@@ -16,7 +16,7 @@ lines(result[["Xx"]], result[["hhat"]], col = 'black', lwd = 2)
 lines(result[["Xx"]], result[["hhat"]] + (result[["hzast"]] + result[["thet"]] * log(log(result[["TJ"]][[result[["Llep"]] + 1]]))) * result[["sigh"]],
       col = 'black', lty = 2, lwd = 2)
 lines(result[["Xx"]], result[["hhat"]] - (result[["hzast"]] + result[["thet"]] * log(log(result[["TJ"]][[result[["Llep"]] + 1]]))) * result[["sigh"]],
-      col = 'black', lty = 2, lwd = 2)
+      col = 'black', lty = 3, lwd = 2)
 # Add legend
 legend('topright', legend = c('Data', 'Estimated Derivative', 'Confidence Bands'),
        pch = c(20, NA, NA), lty = c(NA, 1, 2), col = c('grey', 'black', 'black'))
