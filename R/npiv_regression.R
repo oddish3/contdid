@@ -88,14 +88,44 @@ npiv_regression <- function(data,
   # Calculate ATT^o and TWFE
   data_full$binary <- as.integer(data_full[[treatment_col]] > 0)
   binarised <- tryCatch({
+    # Fit the model using fixest
     model <- fixest::feols(as.formula(paste(outcome_col, "~ binary")), data = data_full)
+
+    # Check if the "binary" coefficient is present
     if (!"binary" %in% names(coef(model))) {
       stop("Error: The binary treatment variable was removed due to collinearity.")
     }
-    model
+
+    # Extract the coefficient and standard error for "binary"
+    estimate <- coef(model)["binary"]
+    std_error <- fixest::se(model)["binary"]
+
+    # Calculate degrees of freedom
+    df <- model$nobs - length(coef(model))  # n - k - 1
+
+    # Calculate the critical t value for a 95% confidence level
+    t_value <- qt(0.975, df)
+
+    # Calculate margin of error
+    margin_of_error <- t_value * std_error
+
+    # Calculate confidence intervals
+    lower_ci <- estimate - margin_of_error
+    upper_ci <- estimate + margin_of_error
+
+    # Return model along with confidence intervals
+    list(
+      model = model,
+      estimate = estimate,
+      std_error = std_error,
+      lower_ci = lower_ci,
+      upper_ci = upper_ci
+    )
+
   }, error = function(e) {
     stop(paste("Error in binarised regression:", e$message))
   })
+
 
   # Construct eta and compute its sample variance
   E_Y_D0 <- mean(data_full[[outcome_col]][data_full[[treatment_col]] == 0])
@@ -134,6 +164,7 @@ npiv_regression <- function(data,
   p_value_ACR <- 2 * stats::pt(-abs(t_statistic), df=df)
 
   t_crit <- stats::qt(0.975, df=df)
+
   ci_lower <- ACR_estimate - t_crit * se_ACR
   ci_upper <- ACR_estimate + t_crit * se_ACR
 
