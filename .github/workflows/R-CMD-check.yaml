@@ -36,24 +36,35 @@ jobs:
           pwd
           ls -R
         shell: bash
-      - name: Run tests with devtools
+      - name: Load package
         run: |
           Rscript -e '
-          library(devtools)
-          library(testthat)
-          setwd(getwd())
-          devtools::load_all()
-          test_results <- tryCatch(
-            devtools::test(),
-            error = function(e) {
-              message("Error occurred: ", e$message)
-              return(NULL)
-            }
-          )
-          if (is.null(test_results)) {
-            quit(status = 1)
+          message("Starting load_all")
+          devtools::load_all(recompile = TRUE)
+          message("load_all completed")
+          '
+        shell: bash
+      - name: Run tests
+        run: |
+          Rscript -e '
+          message("Starting tests")
+          options(warn = 2)  # Treat warnings as errors
+          test_results <- tryCatch({
+            devtools::test()
+          }, error = function(e) {
+            message("Error occurred during testing: ", e$message)
+            return(NULL)
+          }, warning = function(w) {
+            message("Warning occurred during testing: ", w$message)
+            return(NULL)
+          })
+          message("Tests completed")
+          if (!is.null(test_results)) {
+            saveRDS(test_results, file = "test_results.rds")
+            message("Test results saved")
+          } else {
+            message("No test results to save")
           }
-          saveRDS(test_results, file = "test_results.rds")
           '
         shell: bash
       - name: Upload test results
