@@ -2,9 +2,9 @@ name: R Package Checks
 
 on:
   push:
-    branches: [main, master, develop]
+    branches: [main, master, develop, dev]
   pull_request:
-    branches: [main, master]
+    branches: [main, master, develop, dev]
   workflow_dispatch:
 
 jobs:
@@ -18,30 +18,24 @@ jobs:
           - {os: ubuntu-latest, r: 'release'}
           - {os: macOS-latest, r: 'release'}
           - {os: windows-latest, r: 'release'}
-
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: ${{ matrix.config.r }}
           use-public-rspm: true
-
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::testthat, any::devtools
           needs: check
-
       - name: Check package structure
         run: |
           pwd
           ls -R
         shell: bash
-
       - name: Run tests with devtools
         run: |
           Rscript -e '
@@ -59,12 +53,14 @@ jobs:
           if (is.null(test_results)) {
             quit(status = 1)
           }
+          saveRDS(test_results, file = "test_results.rds")
           '
         shell: bash
-
       - name: Upload test results
         uses: actions/upload-artifact@v3
-        if: failure()
+        if: always()
         with:
-          name: test-results
-          path: tests/testthat/
+          name: test-results-${{ matrix.config.os }}
+          path: |
+            test_results.rds
+            tests/testthat/
