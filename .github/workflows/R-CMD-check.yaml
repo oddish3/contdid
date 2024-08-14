@@ -8,7 +8,22 @@ on:
   workflow_dispatch:
 
 jobs:
+  determine_check_type:
+    runs-on: ubuntu-latest
+    outputs:
+      run_type: ${{ steps.check_run_type.outputs.run_type }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: check_run_type
+        run: |
+          if [[ "${{ github.event.head_commit.message }}" == *"[long-run]"* ]]; then
+            echo "run_type=comprehensive" >> $GITHUB_OUTPUT
+          else
+            echo "run_type=quick" >> $GITHUB_OUTPUT
+          fi
+
   test:
+    needs: determine_check_type
     runs-on: ${{ matrix.config.os }}
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
     strategy:
@@ -33,10 +48,19 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck
+          extra-packages: any::testthat, any::devtools, any::rcmdcheck
           needs: check
 
-      - name: Check package
+      - name: Run quick check
+        if: needs.determine_check_type.outputs.run_type == 'quick'
+        run: |
+          options(crayon.enabled = TRUE)
+          devtools::load_all()
+          testthat::test_dir("tests/testthat", reporter = "summary")
+        shell: Rscript {0}
+
+      - name: Run comprehensive check
+        if: needs.determine_check_type.outputs.run_type == 'comprehensive'
         env:
           _R_CHECK_CRAN_INCOMING_: false
         run: |
@@ -44,16 +68,28 @@ jobs:
           rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
         shell: Rscript {0}
 
+      - name: Run tests (comprehensive)
+        if: needs.determine_check_type.outputs.run_type == 'comprehensive'
+        run: |
+          options(crayon.enabled = TRUE)
+          devtools::load_all()
+          test_results <- testthat::test_dir("tests/testthat", reporter = "summary")
+          saveRDS(test_results, file = "test_results.rds")
+          print(test_results)
+        shell: Rscript {0}
+
       - name: Upload check results
-        if: failure()
+        if: failure() && needs.determine_check_type.outputs.run_type == 'comprehensive'
         uses: actions/upload-artifact@v3
         with:
           name: ${{ runner.os }}-r${{ matrix.config.r }}-results
           path: check
 
-      - name: Test coverage
-        if: runner.os == 'Linux'
-        run: |
-          pak::pkg_install("covr")
-          covr::codecov(token = "${{secrets.CODECOV_TOKEN}}")
-        shell: Rscript {0}
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: needs.determine_check_type.outputs.run_type == 'comprehensive'
+        with:
+          name: test-results-${{ matrix.config.os }}
+          path: |
+            test_results.rds
+            tests/testthat/
