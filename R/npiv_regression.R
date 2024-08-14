@@ -32,7 +32,6 @@ npiv_regression <- function(data,
     }
   }
   validate_columns(data, c(treatment_col, outcome_col, id_col))
-
   # Prepare data
   data_full <- data
   data <- data[data[[treatment_col]] != 0, ]
@@ -78,7 +77,9 @@ npiv_regression <- function(data,
   # Compute resolution levels
   Jhat_result <- jhat(PP, PP, CJ, CJ, TJ, M, n, nL)
   Lhat <- Jhat_result$LL
+
   # browser()
+  # set.seed(1234)
   Jlep_result <- jlep(Lhat, Px, PP, PP, as.integer(CJ), as.integer(CJ), as.integer(TJ), y, as.integer(n), 1000)
   Llep <- Jlep_result$LL
   thet <- Jlep_result$theta

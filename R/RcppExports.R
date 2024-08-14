@@ -9,6 +9,10 @@ jhat <- function(PP, BB, CJ, CK, TJ, M, n, nL) {
     .Call(`_contdid_jhat`, PP, BB, CJ, CK, TJ, M, n, nL)
 }
 
+npivq <- function(P, B, y) {
+    .Call(`_contdid_npivq`, P, B, y)
+}
+
 jlep <- function(Lhat, Px, PP, BB, CJ, CK, TJ, y, n, nb) {
     .Call(`_contdid_jlep`, Lhat, Px, PP, BB, CJ, CK, TJ, y, n, nb)
 }

@@ -42,6 +42,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// npivq
+Rcpp::List npivq(const arma::mat& P, const arma::mat& B, const arma::vec& y);
+RcppExport SEXP _contdid_npivq(SEXP PSEXP, SEXP BSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type P(PSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type B(BSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(npivq(P, B, y));
+    return rcpp_result_gen;
+END_RCPP
+}
 // jlep
 Rcpp::List jlep(arma::uword Lhat, const arma::mat& Px, const arma::mat& PP, const arma::mat& BB, const arma::uvec& CJ, const arma::uvec& CK, const arma::vec& TJ, const arma::vec& y, arma::uword n, arma::uword nb);
 RcppExport SEXP _contdid_jlep(SEXP LhatSEXP, SEXP PxSEXP, SEXP PPSEXP, SEXP BBSEXP, SEXP CJSEXP, SEXP CKSEXP, SEXP TJSEXP, SEXP ySEXP, SEXP nSEXP, SEXP nbSEXP) {
@@ -109,6 +122,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_contdid_bspline", (DL_FUNC) &_contdid_bspline, 3},
     {"_contdid_jhat", (DL_FUNC) &_contdid_jhat, 8},
+    {"_contdid_npivq", (DL_FUNC) &_contdid_npivq, 3},
     {"_contdid_jlep", (DL_FUNC) &_contdid_jlep, 10},
     {"_contdid_npiv", (DL_FUNC) &_contdid_npiv, 3},
     {"_contdid_npiv_estimate_cpp", (DL_FUNC) &_contdid_npiv_estimate_cpp, 8},

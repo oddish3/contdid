@@ -3,8 +3,11 @@ library(readr)
 library(dplyr)
 library(purrr)
 library(contdid)
+set.seed(1234567)
 # Helper function to load CSV files
+# debugonce(npiv_regression)
 load_csv_files <- function(directory) {
+  # browser()
   csv_files <- list.files(directory, pattern = "\\.csv$", full.names = TRUE)
   if (length(csv_files) == 0) {
     stop("No CSV files found in the specified directory")
@@ -23,7 +26,6 @@ load_csv_files <- function(directory) {
 }
 # Test function
 test_matlab_equality <- function(r_result, matlab_data, tolerance = 1e-2) {
-  # browser()
   common_vars <- intersect(names(r_result), names(matlab_data))
   for (var in common_vars) {
     r_value <- r_result[[var]]
