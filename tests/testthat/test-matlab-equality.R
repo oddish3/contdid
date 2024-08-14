@@ -69,20 +69,20 @@ test_matlab_equality <- function(r_result, matlab_data, tolerance = 1e-2) {
 
 # Main test
 test_that("Short Test: R results match MATLAB results", {
-  skip_if_not(file.exists("/home/oddish3/Documents/M_folder/CCK-OG/CCK/script"),
+  skip_if_not(file.exists("/home/oddish3/Documents/uni/master-dissertation/contdid/tests/testthat"),
               "MATLAB data directory not found")
-  skip_if_not(file.exists("/home/oddish3/Downloads/medicare1.csv"),
+  skip_if_not(file.exists("/home/oddish3/Documents/uni/master-dissertation/contdid/tests/testthat/medicare1.csv"),
               "Medicare data file not found")
 
   # Load MATLAB CSV files
   matlab_data <- tryCatch({
-    load_csv_files("/home/oddish3/Documents/M_folder/CCK-OG/CCK/script")
+    load_csv_files("/home/oddish3/Documents/uni/master-dissertation/contdid/tests/testthat")
   }, error = function(e) {
     skip(paste("Error loading MATLAB data:", e$message))
   })
 
   # Load and sample R data
-  data <- read.csv("/home/oddish3/Downloads/medicare1.csv")
+  data <- read.csv("/home/oddish3/Documents/uni/master-dissertation/contdid/tests/testthat/medicare1.csv")
   # sampled_data <- data %>% sample_n(min(1000, nrow(data)))  # Sample 1000 rows or less if data is smaller
 
   # Run your R function

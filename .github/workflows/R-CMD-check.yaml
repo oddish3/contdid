@@ -23,33 +23,27 @@ jobs:
           - {os: ubuntu-latest, r: 'release'}
           - {os: macOS-latest, r: 'release'}
           - {os: windows-latest, r: 'release'}
-
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: ${{ matrix.config.r }}
           use-public-rspm: true
-
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::testthat
           needs: check
-
       - name: Determine test type
         id: test-type
         run: |
-          if [[ "${{ contains(github.event.head_commit.message, '[full-test]') }}" == "true" ]]; then
+          if [[ "${{ contains(github.event.head_commit.message, '[long-run]') }}" == "true" ]]; then
             echo "type=full" >> $GITHUB_OUTPUT
           else
             echo "type=short" >> $GITHUB_OUTPUT
           fi
-
       - name: Run tests
         run: |
           testType="${{ steps.test-type.outputs.type }}"
@@ -58,10 +52,14 @@ jobs:
           else
             Rscript -e 'testthat::test_dir("tests/testthat", filter = "short", reporter = testthat::ProgressReporter, stop_on_failure = TRUE)'
           fi
-
       - name: Upload test results
         uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: test-results
           path: testthat.Rout
+      - name: Upload test data
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-data
+          path: tests/testthat/
