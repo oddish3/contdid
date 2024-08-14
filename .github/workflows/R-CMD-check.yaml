@@ -33,38 +33,46 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::testthat, any::devtools
+          extra-packages: any::testthat
           needs: check
 
-      - name: Check package structure
+      - name: Check working directory
         run: |
           pwd
-          ls -R
+          ls -R tests/testthat
+
+      - name: Determine test type
+        id: test-type
+        run: |
+          if [[ "${{ contains(github.event.head_commit.message, '[long-run]') }}" == "true" ]]; then
+            echo "type=full" >> $GITHUB_OUTPUT
+          else
+            echo "type=short" >> $GITHUB_OUTPUT
+          fi
         shell: bash
 
-      - name: Run tests with devtools
-        run: |
-          Rscript -e '
-          library(devtools)
-          library(testthat)
-          setwd(getwd())
-          devtools::load_all()
-          test_results <- tryCatch(
-            devtools::test(),
-            error = function(e) {
-              message("Error occurred: ", e$message)
-              return(NULL)
-            }
-          )
-          if (is.null(test_results)) {
-            quit(status = 1)
-          }
-          '
-        shell: bash
+      - name: Install package
+  run: R CMD INSTALL .
+
+- name: Run tests
+  run: |
+    testType="${{ steps.test-type.outputs.type }}"
+    if [[ "$testType" == "full" ]]; then
+      Rscript -e 'testthat::test_dir("tests/testthat", reporter = testthat::ProgressReporter, stop_on_failure = TRUE)'
+    else
+      Rscript -e 'testthat::test_dir("tests/testthat", filter = "short", reporter = testthat::ProgressReporter, stop_on_failure = TRUE)'
+    fi
+  shell: bash
 
       - name: Upload test results
         uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: test-results
+          path: testthat.Rout
+
+      - name: Upload test data
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-data
           path: tests/testthat/
