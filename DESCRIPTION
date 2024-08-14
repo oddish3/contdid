@@ -19,7 +19,6 @@ Imports:
     fixest (>= 0.8.0),
     MASS (>= 7.3-53),
     progress (>= 1.2.2),
-    
 LinkingTo: 
     Rcpp,
     RcppArmadillo
