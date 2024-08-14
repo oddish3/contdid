@@ -22,13 +22,14 @@ jobs:
           - {os: ubuntu-latest, r: 'devel'}
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: r-lib/actions/setup-r@v3
+      # Update to a specific version that is compatible with Node.js 16+
+      - uses: actions/checkout@v4.2.0  # or @v4 for latest
+      - uses: r-lib/actions/setup-r@v3  # Ensure this is the latest compatible version
         with:
           r-version: ${{ matrix.config.r }}
-      - uses: r-lib/actions/setup-r-dependencies@v3
+      - uses: r-lib/actions/setup-r-dependencies@v3  # Ensure this is the latest compatible version
         with:
           extra-packages: any::rcmdcheck
           needs: check
-      - uses: r-lib/actions/check-r-package@v3
+      - uses: r-lib/actions/check-r-package@v3  # Ensure this is the latest compatible version
 
