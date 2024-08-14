@@ -1,8 +1,15 @@
-#' B spline
+#' B-spline calculation
 #'
-
+#' This function calculates B-spline basis functions.
+#'
+#' @param x Input vector. The points at which to evaluate the B-spline basis functions.
+#' @param l Resolution level. Determines the number of basis functions.
+#' @param r Order of the B-spline. Determines the polynomial degree (degree = order - 1).
+#' @param kts Optional. Vector of knots for the B-spline. If NULL, knots will be generated automatically.
+#'
+#' @return A matrix of B-spline basis function values.
+#'
 #' @export
-#'
 bspline <- function(x, l, r, kts = NULL) {
   N <- length(x)
   m <- 2^l - 1

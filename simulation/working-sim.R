@@ -2,11 +2,13 @@ rm(list=ls())
 library(parallel)
 library(doParallel)
 library(foreach)
-library(contdid)
 library(doRNG)
 library(tidyverse)
 library(fixest)
 library(splines2)
+
+devtools::load_all("~/Documents/uni/master-dissertation/contdid")
+library(contdid)
 
 # Source necessary functions
 source("~/Documents/uni/master-dissertation/contdid/simulation/DGP1.R")

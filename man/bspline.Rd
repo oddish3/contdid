@@ -2,10 +2,22 @@
 % Please edit documentation in R/bspline.R
 \name{bspline}
 \alias{bspline}
-\title{B spline}
+\title{B-spline calculation}
 \usage{
 bspline(x, l, r, kts = NULL)
 }
+\arguments{
+\item{x}{Input vector. The points at which to evaluate the B-spline basis functions.}
+
+\item{l}{Resolution level. Determines the number of basis functions.}
+
+\item{r}{Order of the B-spline. Determines the polynomial degree (degree = order - 1).}
+
+\item{kts}{Optional. Vector of knots for the B-spline. If NULL, knots will be generated automatically.}
+}
+\value{
+A matrix of B-spline basis function values.
+}
 \description{
-B spline
+This function calculates B-spline basis functions.
 }

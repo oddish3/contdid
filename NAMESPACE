@@ -2,7 +2,6 @@
 
 export(bspline)
 export(npiv_regression)
-export(update_package)
 import(RcppArmadillo)
 importFrom(Rcpp,sourceCpp)
 importFrom(devtools,install)
