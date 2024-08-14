@@ -14,20 +14,16 @@ Encoding: UTF-8
 LazyData: true
 Imports: 
     Rcpp,
-    RcppArmadillo,
-    devtools,
     fixest (>= 0.8.0),
-    MASS (>= 7.3-53),
-    progress (>= 1.2.2),
+    MASS,
+    progress
 LinkingTo: 
     Rcpp,
     RcppArmadillo
 RoxygenNote: 7.3.2
 Suggests: 
     testthat (>= 3.0.0),
-    tidyverse,
     dplyr,
     purrr,
     readr
 Config/testthat/edition: 3
-SystemRequirements: C++11

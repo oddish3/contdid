@@ -33,37 +33,15 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::testthat, any::devtools, any::rcmdcheck
+          extra-packages: any::rcmdcheck
           needs: check
 
-      - name: Check package structure
-        run: |
-          pwd
-          ls -R
-        shell: bash
-
-      - name: Enable core dumps (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          reg add "HKLM\SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps" /v DumpFolder /t REG_EXPAND_SZ /d "%LOCALAPPDATA%\CrashDumps" /f
-          reg add "HKLM\SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps" /v DumpCount /t REG_DWORD /d 10 /f
-          reg add "HKLM\SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps" /v DumpType /t REG_DWORD /d 2 /f
-        shell: cmd
-
-      - name: Load and check package
+      - name: Check package
+        env:
+          _R_CHECK_CRAN_INCOMING_: false
         run: |
           options(crayon.enabled = TRUE)
           rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
-        shell: Rscript {0}
-
-      - name: Run tests
-        run: |
-          options(crayon.enabled = TRUE)
-          library(testthat)
-          library(devtools)
-          devtools::load_all()
-          test_results <- testthat::test_dir("tests/testthat", reporter = "summary")
-          saveRDS(test_results, file = "test_results.rds")
         shell: Rscript {0}
 
       - name: Upload check results
@@ -73,18 +51,9 @@ jobs:
           name: ${{ runner.os }}-r${{ matrix.config.r }}-results
           path: check
 
-      - name: Upload test results
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: test-results-${{ matrix.config.os }}
-          path: |
-            test_results.rds
-            tests/testthat/
-
-      - name: Upload crash dumps (Windows)
-        if: failure() && runner.os == 'Windows'
-        uses: actions/upload-artifact@v3
-        with:
-          name: crash-dumps-windows
-          path: ${{ env.LOCALAPPDATA }}\CrashDumps\
+      - name: Test coverage
+        if: runner.os == 'Linux'
+        run: |
+          pak::pkg_install("covr")
+          covr::codecov(token = "${{secrets.CODECOV_TOKEN}}")
+        shell: Rscript {0}
