@@ -7,7 +7,7 @@ run_simulation <- function(n, dgp, nrep) {
   ) %dorng% {
     # Generate data
     # set.seed(1234567)
-    dat <- gdata(n = 100, dgp = 1)
+    dat <- gdata(n = n, dgp = dgp)
     data <- dat[["data"]]
     info <- dat[["info"]]
     # write.csv(data, "/home/oddish3/Documents/uni/master-dissertation/code-cont/data.csv")
@@ -32,7 +32,8 @@ run_simulation <- function(n, dgp, nrep) {
     closest_indices <- sapply(npiv_result$Xx, function(x) which.min(abs(x_grid - x)))
     h0 <- info$func_values[closest_indices]
     d0 <- info$func_deriv_values[closest_indices]
-
+    true_functions <- data.frame(h0 = h0, d0 = d0)
+    # write.csv(true_functions, "/home/oddish3/Documents/uni/master-dissertation/code-cont/r_true_functions.csv", row.names = FALSE)
     # Compute UCB coverage
     A <- log(log(npiv_result$TJ[npiv_result$Ltil + 1]))
 
@@ -47,7 +48,7 @@ run_simulation <- function(n, dgp, nrep) {
     )
 
     #NPIV ACR
-    true_acr <- info[["true_acr"]]
+    true_acr <- info[["pop_acr"]]
     npiv_acr_estimate <- npiv_result[["ACR_estimate"]]
     npiv_acr_se <- npiv_result[["se_ACR"]]
     npiv_acr_l <- npiv_result[["ci_lower_ACR"]]

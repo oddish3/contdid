@@ -43,10 +43,8 @@ npiv_regression <- function(data,
   # Create grid for x
   # Xx <- seq(0, 1, length.out = nx)
   # Xx_sub <- Xx[Xx>0.01 & Xx<=0.99]
-  x_min <- min(x)
-  x_max <- max(x)
-  Xx <- seq(x_min, x_max, length.out = nx)  # Note: increasing order to match sorted x
-  Xx_sub <- Xx
+  Xx <- seq(0, 1, length.out = nx + 1)  # +1 because MATLAB's 0:1/nx:1 includes both endpoints
+  Xx_sub <- Xx[Xx > 0.01 & Xx <= 0.99]
 
   # Compute basis functions
   compute_basis_functions <- function(x, nL, r, CJ, derivative = FALSE) {
