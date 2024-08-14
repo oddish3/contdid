@@ -1,8 +1,8 @@
 rm(list=ls())
-medicare1 <- read.csv('~/Downloads/medicare1.csv')
+load("/home/oddish3/Downloads/medicare1(1).RData")
 library(tidyverse)
 library(contdid)
-# debugonce(npiv_regression)
+debugonce(npiv_regression)
 result <- npiv_regression(
   data = medicare1,
   treatment_col = "medicare_share_1983",
@@ -31,4 +31,4 @@ lines(result[["Xx"]], result[["dhat"]] - (result[["dzast"]] + result[["thet"]] *
 # Add legend
 legend('topright', legend = c('Data', 'Estimated Derivative', 'Confidence Bands'),
        pch = c(20, NA, NA), lty = c(NA, 1, 2), col = c('grey', 'black', 'black'))
-# dev.off()
+dev.off()

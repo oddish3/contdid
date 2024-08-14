@@ -1,4 +1,14 @@
-
+ucb_cvge <- function(h0, hhat, sigh, zast, theta, A) {
+  loss <- max(abs(hhat - h0))
+  tmax <- max(abs((hhat - h0) / sigh))
+  check <- matrix(0, length(zast), length(A))
+  for (i in 1:length(zast)) {
+    for (j in 1:length(A)) {
+      check[i, j] <- as.numeric(tmax <= zast[i] + A[j] * theta)
+    }
+  }
+  return(list(check = check, loss = loss))
+}
 
 # Define the dgp_function as before
 dgp_function <- function(dgp) {
@@ -11,10 +21,10 @@ dgp_function <- function(dgp) {
   }
 
   if (dgp == 2) {
-    dist <- function(n) rtriangle(n, a=0, b=2, c=1)
+    dist <- function(n) rtriangle(n, a=0, b=1, c=1)
     func <- function(x) 3*x - 1
     func_deriv <- function(x) 3
-    E_func <- 2
+    E_func <- 1/2
     E_deriv <- 3
   }
 
@@ -44,7 +54,7 @@ dgp_function <- function(dgp) {
 }
 
 # Now, modify the gdata function to incorporate the dgp_function
-gdata <- function(n, dgp, prop_treated = 0.8, noise_sd = 0.5, index_sd = 1, unobs_het_sd = 1) {
+gdata <- function(n, dgp, prop_treated = 0.8, noise_sd = 1, index_sd = 15, unobs_het_sd = 15) {
   # Get the appropriate dist, func, and func_deriv based on the dgp value
   dgp_params <- dgp_function(dgp)
 
@@ -65,14 +75,10 @@ gdata <- function(n, dgp, prop_treated = 0.8, noise_sd = 0.5, index_sd = 1, unob
   # Calculate treatment effect for treated units using the func function
   treatment_effect <- ifelse(treatment == 1, dgp_params$func(dose), 0)
 
-  # Implement local polynomial regression for smoothing treatment effect
-  if (sum(treatment) > 0) {
-    smooth_effect <- loess(treatment_effect[treatment == 1] ~ dose[treatment == 1], span = 0.75)
-    treatment_effect[treatment == 1] <- predict(smooth_effect)
-  }
-
   # Generate outcomes at time 2 (post-treatment)
-  y2 <- y1 + treatment_effect + rnorm(n, mean = 0, sd = noise_sd)
+  treat_noise <- treatment_effect + rnorm(n, mean = 0, sd = 0)
+  noisy_treatment_effect <- treat_noise[treatment == 1]
+  y2 <- y1 + treat_noise
 
   # Calculate change in outcomes
   dy <- y2 - y1
@@ -107,7 +113,8 @@ gdata <- function(n, dgp, prop_treated = 0.8, noise_sd = 0.5, index_sd = 1, unob
       obs_ate = observed_ate,
       true_acr = true_acr,
       func_values = func_values,
-      func_deriv_values = func_deriv_values
+      func_deriv_values = func_deriv_values,
+      noisy_treatment_effect = noisy_treatment_effect
     )
   ))
 }
@@ -221,20 +228,17 @@ calculate_point_metrics <- function(estimate, true_value, se, lower_ci = NULL, u
   )
 }
 
-ucb_cvge <- function(h0, hhat, sigh, zast, theta, A = 0.05) {
-  # browser()
-  loss <- max(abs(hhat - h0))
-  tmax <- max(abs((hhat - h0) / sigh))
-
-  check <- matrix(0, length(zast), length(A))
-
-  for (i in seq_along(zast)) {
-    for (j in seq_along(A)) {
-      check[i, j] <- as.numeric(tmax <= zast[i] + A[j] * theta)
-    }
-  }
-
-  return(list(check = check, loss = loss))
-}
+# ucb_cvge <- function(h0, hhat, sigh, zast, theta, A = 0.05) {
+#   loss <- max(abs(hhat - h0))
+#   tmax <- max(abs((hhat - h0) / sigh))
+#   check <- matrix(0, length(zast), length(A))
+#   for (i in seq_along(zast)) {
+#     for (j in seq_along(A)) {
+#       check[i, j] <- as.numeric(tmax <= zast[i] + A[j] * theta)
+#     }
+#   }
+#   browser()
+#   return(list(check = check, loss = loss, tmax = tmax))
+# }
 
 

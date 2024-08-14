@@ -8,7 +8,7 @@ npiv_regression <- function(data,
                             nL = 9,
                             r = 4,
                             M = 5) {
-  set.seed(1234567)
+  # set.seed(1234567)
   pb <- progress::progress_bar$new(total = 7, format = "[:bar] :percent eta: :eta")
 
   # Check if specified columns exist in the data
@@ -41,8 +41,12 @@ npiv_regression <- function(data,
   CJ <- c(0, cumsum(TJ))
 
   # Create grid for x
-  Xx <- seq(0, 1, length.out = nx)
-  Xx_sub <- Xx[Xx>0.01 & Xx<=0.99]
+  # Xx <- seq(0, 1, length.out = nx)
+  # Xx_sub <- Xx[Xx>0.01 & Xx<=0.99]
+  x_min <- min(x)
+  x_max <- max(x)
+  Xx <- seq(x_min, x_max, length.out = nx)  # Note: increasing order to match sorted x
+  Xx_sub <- Xx
 
   # Compute basis functions
   compute_basis_functions <- function(x, nL, r, CJ, derivative = FALSE) {
@@ -55,8 +59,8 @@ npiv_regression <- function(data,
   }
 
   PP <- compute_basis_functions(x, nL, r, CJ)
-  Px <- compute_basis_functions(Xx, nL, r, CJ)
-  Dx <- compute_basis_functions(Xx, nL, r, CJ, derivative = TRUE)
+  Px <- compute_basis_functions(Xx_sub, nL, r, CJ)
+  Dx <- compute_basis_functions(Xx_sub, nL, r, CJ, derivative = TRUE)
   pb$tick()
 
   # Compute resolution levels
@@ -74,6 +78,7 @@ npiv_regression <- function(data,
   npiv_result <- npiv_estimate_cpp(Ltil, Px, PP, PP, CJ, CJ, y, n)
   hhat <- npiv_result$hhat
   sigh <- npiv_result$sigh
+  # browser()
   spline_dosage_SR <- npiv_result$basis_function
 
   npiv_result_derivative <- npiv_estimate_cpp(Ltil, Dx, PP, PP, CJ, CJ, y, n)
@@ -139,19 +144,20 @@ npiv_regression <- function(data,
 
   # Construct eta and compute its sample variance
   E_Y_D0 <- mean(data_full[[outcome_col]][data_full[[treatment_col]] == 0])
-  u_hat <- y - E_Y_D0 - hhat[findInterval(x, Xx)]
+  u_hat <- y - E_Y_D0 - hhat[findInterval(x, Xx_sub)]
 
-  compute_eta_values <- function(data, treatment_col, outcome_col, Xx, dhat, spline_dosage_SR, spline_dosage_SR1, u_hat) {
+  compute_eta_values <- function(data, treatment_col, outcome_col, Xx_sub, dhat, spline_dosage_SR, spline_dosage_SR1, u_hat) {
+    # browser()
     D <- data[[treatment_col]]
     Y <- data[[outcome_col]]
 
-    ACR_D <- dhat[findInterval(D, Xx)]
+    ACR_D <- dhat[findInterval(D, Xx_sub)]
     E_ACR <- mean(ACR_D)
 
-    psi_D_derivative <- spline_dosage_SR1[findInterval(D, Xx), ]
+    psi_D_derivative <- spline_dosage_SR1[findInterval(D, Xx_sub), ]
     E_dpsi <- colMeans(psi_D_derivative)
 
-    psi_D <- spline_dosage_SR[findInterval(D, Xx), ]
+    psi_D <- spline_dosage_SR[findInterval(D, Xx_sub), ]
     E_psi_psi_inv <- MASS::ginv(t(psi_D) %*% psi_D / nrow(data))
 
     correction_term <- (psi_D %*% E_psi_psi_inv %*% E_dpsi) * u_hat
@@ -159,13 +165,13 @@ npiv_regression <- function(data,
     ACR_D - E_ACR + as.vector(correction_term)
   }
 
-  eta_values <- compute_eta_values(data, treatment_col, outcome_col, Xx, dhat, spline_dosage_SR, spline_dosage_SR1, u_hat)
+  eta_values <- compute_eta_values(data, treatment_col, outcome_col, Xx_sub, dhat, spline_dosage_SR, spline_dosage_SR1, u_hat)
 
   variance_ACR <- mean(eta_values^2)
   se_ACR <- sqrt(variance_ACR / length(eta_values))
   pb$tick()
 
-  ACR_estimate <- mean(dhat[findInterval(data[[treatment_col]], Xx)])
+  ACR_estimate <- mean(dhat[findInterval(data[[treatment_col]], Xx_sub)])
 
   # Compute statistics
   n_treated <- sum(data_full[[treatment_col]] > 0)
@@ -183,9 +189,10 @@ npiv_regression <- function(data,
   list(
     x = x,
     y = y,
-    Xx = Xx,
+    Xx = Xx_sub,
     TJ = TJ,
     Llep = Llep,
+    Ltil = Ltil,
     hhat = hhat,
     sigh = sigh,
     sigd = sigd,
@@ -197,6 +204,7 @@ npiv_regression <- function(data,
     dzast = dzast,
     ACR_estimate = ACR_estimate,
     se_ACR = se_ACR,
+    dhat = dhat,
     t_statistic_ACR = t_statistic,
     p_value_ACR = p_value_ACR,
     ACR_upper_UCB = ACR_upper_UCB,

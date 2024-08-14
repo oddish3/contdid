@@ -46,6 +46,7 @@ ucb_cv <- function(Ltil, Lhat, Px, PP, BB, CJ, CK, y, n, nb, type, alpha) {
   # Critical value
   if (type == 0 || type == -1) {
     z <- apply(ZZ, 2, max)
+    # browser()
     cv <- quantile(z, 1 - alpha)
   } else if (type == 1) {
     z <- apply(ZZ, 2, min)
