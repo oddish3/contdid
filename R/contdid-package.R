@@ -1,9 +1,10 @@
 #' @keywords internal
 "_PACKAGE"
 
-## usethis namespace: start
 #' @useDynLib contdid, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
-## usethis namespace: end
+#' @importFrom stats as.formula coef qt quantile rnorm
+#' @importFrom utils remove.packages
+#' @importFrom devtools install
+#' @import RcppArmadillo
 NULL
-

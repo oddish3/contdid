@@ -1,4 +1,18 @@
+#' Non-parametric Instrumental Variable Regression
+#'
+#' @param data A data frame containing the variables for the regression.
+#' @param treatment_col Name of the treatment variable column.
+#' @param outcome_col Name of the outcome variable column.
+#' @param id_col Name of the ID variable column (optional).
+#' @param alpha Significance level(s) for confidence intervals.
+#' @param nx Number of points for the grid of x values.
+#' @param nL Maximum resolution level for J.
+#' @param r B-spline order.
+#' @param M Ex ante upper bound on sup_x h_0(x).
+#'
+#' @return A list containing the results of the NPIV regression.
 #' @export
+#'
 npiv_regression <- function(data,
                             treatment_col,
                             outcome_col,
