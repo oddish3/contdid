@@ -18,7 +18,7 @@ npiv_regression <- function(data,
                             outcome_col,
                             id_col = NULL,
                             alpha = c(0.05), # 0.1. 0.01
-                            nx = 880,
+                            nx = 1000,
                             nL = 9,
                             r = 4,
                             M = 5) {
