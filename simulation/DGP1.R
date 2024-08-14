@@ -231,4 +231,15 @@ ucb_cvge <- function(h0, hhat, sigh, zast, theta, A) {
   return(list(check = check, loss = loss))
 }
 
-
+write_debug_info <- function(message, file_path = "debug_output.txt") {
+  cat(paste0(Sys.time(), " - ", message, "\n"), file = file_path, append = TRUE)
+}
+log_dimensions <- function(name, obj) {
+  if (is.vector(obj)) {
+    write_debug_info(paste(name, "length:", length(obj)))
+  } else if (is.matrix(obj) || is.data.frame(obj)) {
+    write_debug_info(paste(name, "dimensions:", paste(dim(obj), collapse = "x")))
+  } else {
+    write_debug_info(paste(name, "type:", class(obj)))
+  }
+}

@@ -15,11 +15,22 @@ run_simulation <- function(n, dgp, nrep) {
     # # Run estimators and calculate metrics
     # NPIV
     # debugonce(npiv_regression)
-    npiv_result <- npiv_regression(
-      data = data,
-      treatment_col = "dose",
-      outcome_col = "dy",
-    )
+    npiv_result <- tryCatch({
+      result <- npiv_regression(
+        data = data,
+        treatment_col = "dose",
+        outcome_col = "dy",
+      )
+      # write_debug_info("npiv_regression completed successfully")
+      result
+    }, error = function(e) {
+      # write_debug_info(paste("Error in npiv_regression:", e$message))
+      return(NULL)
+    })
+    if (is.null(npiv_result)) {
+      # write_debug_info("Skipping rest of iteration due to npiv_regression failure")
+      return(NULL)
+    }
     true_att <- info[["pop_att"]]
     npiv_att_estimate <- npiv_result[["binarised"]][["estimate"]][["binary"]]
     npiv_att_se <- npiv_result[["binarised"]][["std_error"]][["binary"]]
