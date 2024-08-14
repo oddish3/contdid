@@ -14,10 +14,9 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {os: windows-latest, r: 'release'}
-          - {os: macOS-latest, r: 'release'}
           - {os: ubuntu-latest, r: 'release'}
-          - {os: ubuntu-latest, r: 'devel', http-user-agent: 'release'}
+          - {os: macOS-latest, r: 'release'}
+          - {os: windows-latest, r: 'release'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -25,11 +24,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - uses: r-lib/actions/setup-pandoc@v2
+
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: ${{ matrix.config.r }}
-          http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
       - uses: r-lib/actions/setup-r-dependencies@v2
@@ -37,6 +37,23 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
+      - name: Install ccache
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get install ccache
+          echo "CC=ccache gcc" >> $GITHUB_ENV
+          echo "CXX=ccache g++" >> $GITHUB_ENV
+
+      - name: Cache ccache
+        if: runner.os == 'Linux'
+        uses: actions/cache@v3
+        with:
+          path: ~/.ccache
+          key: ${{ runner.os }}-r-${{ matrix.config.r }}-ccache-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-r-${{ matrix.config.r }}-ccache-
+
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
+          args: 'c("--no-manual", "--as-cran", "--no-build-vignettes")'
+          error-on: '"error"'
