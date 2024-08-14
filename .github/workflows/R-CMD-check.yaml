@@ -44,6 +44,13 @@ jobs:
           message("load_all completed")
           '
         shell: bash
+        - name: Enable core dumps (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          reg add "HKLM\SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps" /v DumpFolder /t REG_EXPAND_SZ /d "%LOCALAPPDATA%\CrashDumps" /f
+          reg add "HKLM\SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps" /v DumpCount /t REG_DWORD /d 10 /f
+          reg add "HKLM\SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps" /v DumpType /t REG_DWORD /d 2 /f
+        shell: cmd
       - name: Run tests
         run: |
           Rscript -e '

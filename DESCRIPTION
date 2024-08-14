@@ -18,13 +18,17 @@ Imports:
     devtools,
     fixest (>= 0.8.0),
     MASS (>= 7.3-53),
-    progress (>= 1.2.2)
+    progress (>= 1.2.2),
+    
 LinkingTo: 
     Rcpp,
     RcppArmadillo
 RoxygenNote: 7.3.2
 Suggests: 
     testthat (>= 3.0.0),
-    tidyverse
+    tidyverse,
+    dplyr,
+    purrr,
+    readr
 Config/testthat/edition: 3
 SystemRequirements: C++11

@@ -12,20 +12,20 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // bspline
-List bspline(NumericVector x, int l, int r);
+List bspline(NumericVector x, size_t l, size_t r);
 RcppExport SEXP _contdid_bspline(SEXP xSEXP, SEXP lSEXP, SEXP rSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
-    Rcpp::traits::input_parameter< int >::type l(lSEXP);
-    Rcpp::traits::input_parameter< int >::type r(rSEXP);
+    Rcpp::traits::input_parameter< size_t >::type l(lSEXP);
+    Rcpp::traits::input_parameter< size_t >::type r(rSEXP);
     rcpp_result_gen = Rcpp::wrap(bspline(x, l, r));
     return rcpp_result_gen;
 END_RCPP
 }
 // jhat
-Rcpp::List jhat(const arma::mat& PP, const arma::mat& BB, const arma::vec& CJ, const arma::vec& CK, const arma::vec& TJ, double M, int n, int nL);
+Rcpp::List jhat(const arma::mat& PP, const arma::mat& BB, const arma::vec& CJ, const arma::vec& CK, const arma::vec& TJ, double M, arma::uword n, arma::uword nL);
 RcppExport SEXP _contdid_jhat(SEXP PPSEXP, SEXP BBSEXP, SEXP CJSEXP, SEXP CKSEXP, SEXP TJSEXP, SEXP MSEXP, SEXP nSEXP, SEXP nLSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -36,8 +36,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type CK(CKSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type TJ(TJSEXP);
     Rcpp::traits::input_parameter< double >::type M(MSEXP);
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< int >::type nL(nLSEXP);
+    Rcpp::traits::input_parameter< arma::uword >::type n(nSEXP);
+    Rcpp::traits::input_parameter< arma::uword >::type nL(nLSEXP);
     rcpp_result_gen = Rcpp::wrap(jhat(PP, BB, CJ, CK, TJ, M, n, nL));
     return rcpp_result_gen;
 END_RCPP
