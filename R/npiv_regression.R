@@ -38,8 +38,8 @@ npiv_regression <- function(data,
   data_n <- ndata[1]
   data <- data[data[[treatment_col]] != 0, ]
 
-  log_dimensions("data", data)
-  log_dimensions("data_full", data_full)
+  # log_dimensions("data", data)
+  # log_dimensions("data_full", data_full)
 
   # Check if there are any non-zero treatment values
   if (nrow(data) == 0) {
@@ -234,19 +234,19 @@ npiv_regression <- function(data,
   # log_dimensions("u_hat", u_hat)
 
   compute_eta_values <- function(data, treatment_col, outcome_col, Xx_sub, dhat, spline_dosage_SR, spline_dosage_SR1, u_hat) {
-    log_info <- function(message) {
-      # write_debug_info(paste("compute_eta_values:", message))
-    }
+    # log_info <- function(message) {
+    #   write_debug_info(paste("compute_eta_values:", message))
+    # }
 
-    log_dim <- function(name, obj) {
-      if (is.vector(obj)) {
-        # log_info(paste(name, "length:", length(obj)))
-      } else if (is.matrix(obj) || is.data.frame(obj)) {
-        # log_info(paste(name, "dimensions:", paste(dim(obj), collapse = "x")))
-      } else {
-        # log_info(paste(name, "type:", class(obj)))
-      }
-    }
+    # log_dim <- function(name, obj) {
+    #   if (is.vector(obj)) {
+    #     log_info(paste(name, "length:", length(obj)))
+    #   } else if (is.matrix(obj) || is.data.frame(obj)) {
+    #     log_info(paste(name, "dimensions:", paste(dim(obj), collapse = "x")))
+    #   } else {
+    #     log_info(paste(name, "type:", class(obj)))
+    #   }
+    # }
 
     # log_dim("data", data)
     # log_dim("Xx_sub", Xx_sub)
@@ -264,41 +264,41 @@ npiv_regression <- function(data,
     D_max <- max(D)
     Xx_min <- min(Xx_sub)
     Xx_max <- max(Xx_sub)
-    log_info(paste("D range:", D_min, "to", D_max))
+    # log_info(paste("D range:", D_min, "to", D_max))
     # log_info(paste("Xx_sub range:", Xx_min, "to", Xx_max))
 
     # Clamp D values to the range of Xx_sub
     D_clamped <- pmax(pmin(D, Xx_max), Xx_min)
-    if (any(D != D_clamped)) {
-      log_info(paste("Warning:", sum(D != D_clamped), "D values clamped to Xx_sub range"))
-    }
+    # if (any(D != D_clamped)) {
+    #   log_info(paste("Warning:", sum(D != D_clamped), "D values clamped to Xx_sub range"))
+    # }
 
     intervals <- findInterval(D_clamped, Xx_sub)
-    log_dim("intervals", intervals)
+    # log_dim("intervals", intervals)
 
     ACR_D <- dhat[intervals]
-    log_dim("ACR_D", ACR_D)
+    # log_dim("ACR_D", ACR_D)
 
     E_ACR <- mean(ACR_D)
-    log_info(paste("E_ACR:", E_ACR))
+    # log_info(paste("E_ACR:", E_ACR))
 
     psi_D_derivative <- spline_dosage_SR1[intervals, ]
-    log_dim("psi_D_derivative", psi_D_derivative)
+    # log_dim("psi_D_derivative", psi_D_derivative)
 
     E_dpsi <- colMeans(psi_D_derivative)
-    log_dim("E_dpsi", E_dpsi)
+    # log_dim("E_dpsi", E_dpsi)
 
     psi_D <- spline_dosage_SR[intervals, ]
-    log_dim("psi_D", psi_D)
+    # log_dim("psi_D", psi_D)
 
     E_psi_psi_inv <- MASS::ginv(t(psi_D) %*% psi_D / nrow(data))
-    log_dim("E_psi_psi_inv", E_psi_psi_inv)
+    # log_dim("E_psi_psi_inv", E_psi_psi_inv)
 
     correction_term <- (psi_D %*% E_psi_psi_inv %*% E_dpsi) * u_hat
-    log_dim("correction_term", correction_term)
+    # log_dim("correction_term", correction_term)
 
     result <- ACR_D - E_ACR + as.vector(correction_term)
-    log_dim("result", result)
+    # log_dim("result", result)
 
     return(result)
   }
