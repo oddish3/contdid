@@ -92,6 +92,7 @@ test_that("Short Test: R results match MATLAB results", {
     message(paste("R data dimensions:", nrow(data), "x", ncol(data)))
 
     message("Running npiv_regression")
+    # debugonce(npiv_regression)
     r_result <- npiv_regression(data, "medicare_share_1983", "d_capital_labor_ratio")
 
     message("Comparing results")

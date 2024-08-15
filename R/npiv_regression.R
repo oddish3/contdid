@@ -62,13 +62,19 @@ npiv_regression <- function(data,
   CJ <- c(0, cumsum(TJ))
   # log_dimensions("TJ", TJ)
   # log_dimensions("CJ", CJ)
-  # Create grid for x
-  # Xx <- seq(0, 1, length.out = nx)
-  # Xx_sub <- Xx[Xx>0.01 & Xx<=0.99]
+
+   # Create grid for x
+  # x_min <- min(x)
+  # x_max <- max(x)
+  # Xx <- seq(x_min, x_max, length.out = nx + 1)
+  # buffer <- 0.01 * (x_max - x_min)
+  # Xx_sub <- Xx[Xx > x_min + buffer & Xx <= x_max - buffer]
+
   Xx <- seq(0, 1, length.out = nx + 1)  # +0 because MATLAB's 0:1/nx:1 includes both endpoints removed + 1
   Xx_sub <- Xx[Xx > 0.01 & Xx <= 0.99]
   # log_dimensions("Xx", Xx)
   # log_dimensions("Xx_sub", Xx_sub)
+
   # Compute basis functions
   compute_basis_functions <- function(x, nL, r, CJ, derivative = FALSE) {
     result <- matrix(0, nrow = length(x), ncol = CJ[length(CJ)])

@@ -36,7 +36,7 @@ clusterExport(cl, c("dgp_function", "gdata", "run_twfe", "run_feols_bspline", "c
 
 results_list <- list()
 tic()
-for (dgp in 2:2) {
+for (dgp in 1:4) {
   # cat("Processing DGP:", dgp, "\n")
   dgp_results <- list()
   for (sample_size in n) {
@@ -57,11 +57,11 @@ stopCluster(cl)
 toc()
 # saveRDS(results_list, file = "results_list.rds")
 # Combine all results into a single data frame
-# all_results <- do.call(rbind, results_list)
+all_results <- do.call(rbind, results_list)
 
 # Calculate mean results
-# mean_results <- all_results %>%
-#   group_by(n, dgp) %>%
-#   summarise(across(where(is.numeric), ~ mean(.x, na.rm = TRUE)), .groups = "drop")
+mean_results <- all_results %>%
+  group_by(n, dgp) %>%
+  summarise(across(where(is.numeric), ~ mean(.x, na.rm = TRUE)), .groups = "drop")
 
 
