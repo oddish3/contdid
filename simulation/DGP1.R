@@ -43,7 +43,7 @@ dgp_function <- function(dgp) {
 
 # Now, modify the gdata function to incorporate the dgp_function
 gdata <- function(n, dgp, prop_treated = 0.8, noise_sd = 1, index_sd = 15, unobs_het_sd = 15) {
-  # Get the appropriate dist, func, and func_deriv based on the dgp value
+  # Get the appropriate dist, func, and func_deriv based on the dgp values
   dgp_params <- dgp_function(dgp)
 
   # Generate treatment assignment
