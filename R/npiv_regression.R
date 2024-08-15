@@ -264,15 +264,16 @@ npiv_regression <- function(data,
     D_max <- max(D)
     Xx_min <- min(Xx_sub)
     Xx_max <- max(Xx_sub)
-    # log_info(paste("D range:", D_min, "to", D_max))
-    # log_info(paste("Xx_sub range:", Xx_min, "to", Xx_max))
 
     # Clamp D values to the range of Xx_sub
     D_clamped <- pmax(pmin(D, Xx_max), Xx_min)
-    # if (any(D != D_clamped)) {
-    #   log_info(paste("Warning:", sum(D != D_clamped), "D values clamped to Xx_sub range"))
-    # }
 
+    if (any(D != D_clamped)) {
+      message(sprintf("Note: %d D values clamped to Xx_sub range.\n  Original D range: [%.4f, %.4f]\n  Xx_sub range: [%.4f, %.4f]\n  Values outside this range were clamped.",
+                      sum(D != D_clamped),
+                      D_min, D_max,
+                      Xx_min, Xx_max))
+    }
     intervals <- findInterval(D_clamped, Xx_sub)
     # log_dim("intervals", intervals)
 
