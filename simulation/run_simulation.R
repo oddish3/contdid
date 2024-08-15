@@ -7,7 +7,7 @@ run_simulation <- function(n, dgp, nrep) {
   ) %dorng% {
     # Generate data
     # set.seed(1234567)
-    dat <- gdata(n = n, dgp = dgp)
+    dat <- gdata(n = n, dgp = 2)
     data <- dat[["data"]]
     info <- dat[["info"]]
     # write.csv(data, "/home/oddish3/Documents/uni/master-dissertation/code-cont/data.csv")

@@ -11,7 +11,7 @@ dgp_function <- function(dgp) {
   if (dgp == 2) {
     dist <- function(n) rtriangle(n, a=0, b=1, c=1)
     func <- function(x) 3*x - 1
-    func_deriv <- function(x) 3
+    func_deriv <- function(x) rep(3, length(x))
     E_func <- 1/2
     E_deriv <- 3
   }
@@ -83,9 +83,8 @@ gdata <- function(n, dgp, prop_treated = 0.8, noise_sd = 1, index_sd = 15, unobs
   # Calculate true ACR
   samp_acr <- mean(dgp_params$func_deriv(dose[dose > 0]))
   pop_acr <- dgp_params$E_deriv
-
   x_grid <- seq(0, 1, length.out = 1000)
-  func_values <- dgp_params$func(x_grid)
+    func_values <- dgp_params$func(x_grid)
   func_deriv_values <- dgp_params$func_deriv(x_grid)
 
   df <- data.frame(
