@@ -22,7 +22,7 @@ source("~/Documents/uni/master-dissertation/contdid/simulation/run_simulation.R"
 seed1 <- 1234
 set.seed(seed1)
 n <- c(100, 500, 1000,2500)
-nrep <- 1000
+nrep <- 1
 
 # Create cluster
 cl <- makeCluster(detectCores() - 1)
@@ -51,7 +51,7 @@ for (dgp in 1:4) {
 # Stop cluster
 stopCluster(cl)
 toc()
-# saveRDS(results_list, file = "simulation/results_list1.rds")
+# saveRDS(results_list, file = "simulation/results_list2.rds")
 # Combine all results into a single data frame
 all_results <- do.call(rbind, results_list)
 

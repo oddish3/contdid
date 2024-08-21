@@ -1,9 +1,12 @@
 rm(list=ls())
-
+library(generics)
+library(tidyverse)
+library(tidyr)
 library(dplyr)
 set.seed(123)
 # Load the data (assuming you've already done this)
 data <- readRDS("~/Downloads/combined_data.rds")
+unique(data$year)
 
 # Step 1: Assign pre/post periods
 data <- data %>%
@@ -46,7 +49,7 @@ data <- data %>%
 avg_death_rate <- mean(data$deaths_per_100k)
 
 treatment_effect <- function(d, avg_rate) {
-  return(0.5 * d * avg_rate / 100000)  # Scale to match deaths per person
+  return(2.5 * d * avg_rate / 100000)  # Scale to match deaths per person
 }
 
 data <- data %>%
@@ -76,52 +79,25 @@ e_delta_y_d_positive <- data %>%
 print(paste("E[ΔY|D > 0] =", e_delta_y_d_positive))
 
 # Calculate the difference
-att_difference <- e_delta_y_d0 - e_delta_y_d_positive
+att_difference <- e_delta_y_d_positive - e_delta_y_d0
 print(paste("ATT (E[ΔY|D = 0] - E[ΔY|D > 0]) =", att_difference))
 
+# Calculate change in outcome between periods
+data <- data %>%
+  group_by(la_name) %>%
+  mutate(
+    deaths_per_100k_change = deaths_per_100k_sim - first(deaths_per_100k_sim),
+    dose_indicator = if_else(dose > 0, 1, 0)
+  ) %>%
+  ungroup()
 
+# Filter for the second period (post-treatment)
+data_post <- data %>%
+  filter(period == "post")
 
+# Run regression
+regression_model <- lm(deaths_per_100k_change ~ dose_indicator, data = data_post)
 
+# Print regression summary
+summary(regression_model)
 
-
-
-
-calculate_att_d <- function(data, d, bandwidth = 0.1) {
-  # browser()
-  treated <- data %>%
-    filter(period == "post" & abs(dose - d) < bandwidth & treated == 1)
-
-  control <- data %>%
-    filter(period == "post" & treated == 0)
-
-  att_d <- mean(treated$baseline_rate - treated$deaths_per_100k_sim) -
-    mean(control$baseline_rate - control$deaths_per_100k)
-
-  return(att_d)
-}
-
-dose_points <- seq(0.1, 1, by = 0.1)
-att_d_estimates <- sapply(dose_points, calculate_att_d, data = data)
-
-atto_estimate <- mean(att_d_estimates)
-print(paste("Estimated ATTo:", atto_estimate))
-
-# Calculate E[ΔY|D = 0]
-e_delta_y_d0 <- data %>%
-  filter(treated == 0) %>%
-  summarize(mean_change = mean(deaths_per_100k[period == "post"] - baseline_rate)) %>%
-  pull(mean_change)
-
-print(paste("E[ΔY|D = 0] =", e_delta_y_d0))
-
-# Calculate E[ΔY|D > 0]
-e_delta_y_d_positive <- data %>%
-  filter(treated == 1) %>%
-  summarize(mean_change = mean(deaths_per_100k_sim[period == "post"] - baseline_rate)) %>%
-  pull(mean_change)
-
-print(paste("E[ΔY|D > 0] =", e_delta_y_d_positive))
-
-# Calculate the difference
-att_difference <- e_delta_y_d0 - e_delta_y_d_positive
-print(paste("ATT (E[ΔY|D = 0] - E[ΔY|D > 0]) =", att_difference))
