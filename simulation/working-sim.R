@@ -21,8 +21,8 @@ source("~/Documents/uni/master-dissertation/contdid/simulation/run_simulation.R"
 # Set seed
 seed1 <- 1234
 set.seed(seed1)
-n <- c(100, 500, 1000)
-nrep <- 1
+n <- c(100, 500, 1000,2500)
+nrep <- 1000
 
 # Create cluster
 cl <- makeCluster(detectCores() - 1)
@@ -37,25 +37,21 @@ clusterExport(cl, c("dgp_function", "gdata", "run_twfe", "run_feols_bspline", "c
 results_list <- list()
 tic()
 for (dgp in 1:4) {
-  # cat("Processing DGP:", dgp, "\n")
   dgp_results <- list()
   for (sample_size in n) {
-    # cat("  Sample size:", sample_size, "\n")
     tryCatch({
       dgp_results[[as.character(sample_size)]] <- run_simulation(n = sample_size, dgp = dgp, nrep = nrep)
-      # cat("    Completed successfully\n")
     }, error = function(e) {
       cat("    Error occurred:", conditionMessage(e), "\n")
     })
   }
   results_list[[dgp]] <- do.call(rbind, dgp_results)
-  # cat("DGP", dgp, "completed\n\n")
 }
 
 # Stop cluster
 stopCluster(cl)
 toc()
-# saveRDS(results_list, file = "results_list.rds")
+# saveRDS(results_list, file = "simulation/results_list1.rds")
 # Combine all results into a single data frame
 all_results <- do.call(rbind, results_list)
 

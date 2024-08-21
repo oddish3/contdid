@@ -1,37 +1,33 @@
 # Define the dgp_function as before
 dgp_function <- function(dgp) {
   if (dgp == 1) {
-    dist <- function(n) runif(n, 0, 1)
-    func <- function(x) x^2
-    func_deriv <- function(x) 2*x
-    E_func <- 1/3
-    E_deriv <- 1
+    dist <- function(n) rbeta(n, 2, 2)  # Symmetric beta distribution
+    func <- function(x) -4*(x - 0.5)^2 + 1
+    func_deriv <- function(x) -8*(x - 0.5)
+    E_func <- 0.8
+    E_deriv <- 0
   }
-
   if (dgp == 2) {
-    dist <- function(n) rtriangle(n, a=0, b=1, c=1)
-    func <- function(x) 3*x - 1
-    func_deriv <- function(x) rep(3, length(x))
-    E_func <- 1/2
-    E_deriv <- 3
+    dist <- function(n) rbeta(n, 1.5, 3)  # Right-skewed beta distribution
+    func <- function(x) x * (1 - x)
+    func_deriv <- function(x) 1 - 2*x
+    E_func <- 7 / 36  # Analytical solution: 7/36
+    E_deriv <- 1 / 3  # Analytical solution: 1/3
   }
-
   if (dgp == 3) {
-    dist <- function(n) runif(n, 0, 1)
-    func <- function(x) x^3
-    func_deriv <- function(x) 3*x^2
-    E_func <- 1/4
-    E_deriv <- 1
+    dist <- function(n) rbeta(n, 0.5, 0.5)  # U-shaped beta distribution
+    func <- function(x) 4 * (x - 0.5)^2
+    func_deriv <- function(x) 8 * (x - 0.5)
+    E_func <- 1 / 2  # Analytical solution: 1/2
+    E_deriv <- 0  # Analytical solution: 0
   }
-
   if (dgp == 4) {
-    dist <- function(n) rbeta(n, 2, 3)
-    func <- function(x) (x^2 + x) / 2
-    func_deriv <- function(x) x + 1/2
-    E_func <- 5/12
-    E_deriv <- 7/5
+    dist <- function(n) runif(n, 0, 1)  # Uniform distribution
+    func <- function(x) (sin(pi * x) + 1) / 2  # Shifted and scaled sine function
+    func_deriv <- function(x) pi * cos(pi * x) / 2
+    E_func <- (1/pi) + 1/2  # Analytical solution: 0.5
+    E_deriv <- 0  # Analytical solution: 5/3
   }
-
   return(list(
     dist = dist,
     func = func,
@@ -42,84 +38,72 @@ dgp_function <- function(dgp) {
 }
 
 # Now, modify the gdata function to incorporate the dgp_function
-gdata <- function(n, dgp, prop_treated = 0.8, noise_sd = 1, index_sd = 15, unobs_het_sd = 15) {
-  # Get the appropriate dist, func, and func_deriv based on the dgp values
+gdata <- function(n, dgp, prop_treated = 0.8, noise_sd = 0.5, index_sd = 0.5, unobs_het_sd = 0.5, control_trend_mean = 2, control_trend_sd = 0.1) {
   dgp_params <- dgp_function(dgp)
 
   # Generate treatment assignment
   treatment <- rbinom(n, 1, prop_treated)
 
-  # Generate dose for treated units using the dist function
-  dose <- rep(0, n)
-  dose[treatment == 1] <- dgp_params$dist(sum(treatment))
+  # Generate dose for treated units
+  dose <- ifelse(treatment == 1, dgp_params$dist(n), 0)
 
   # Generate indexes
-  index_base <- rnorm(n, mean = 100, sd = index_sd)  # Reduced SD for base index
-  index_unobs_het <- rnorm(n, mean = 0, sd = unobs_het_sd)  # Reduced SD for unobserved heterogeneity
+  index_base <- rnorm(n, mean = 100, sd = index_sd)
+  index_unobs_het_t1 <- rnorm(n, mean = 0, sd = unobs_het_sd)
+  index_unobs_het_t2 <- rnorm(n, mean = 0, sd = unobs_het_sd)
+  control_trend <- rnorm(n, mean = control_trend_mean, sd = control_trend_sd)
 
-  # Generate outcomes at time 1 (pre-treatment)
-  y1 <- index_base + index_unobs_het + rnorm(n, mean = 0, sd = noise_sd)
+  # Generate potential outcomes
+  y1 <- index_base + index_unobs_het_t1 + rnorm(n, mean = 0, sd = noise_sd)
+  y2_0 <- y1 + control_trend + index_unobs_het_t2 + rnorm(n, mean = 0, sd = noise_sd)
+  treatment_effect <- dgp_params$func(dose)
+  y2_1 <- y2_0 + treatment_effect
 
-  # Calculate treatment effect for treated units using the func function
-  treatment_effect <- ifelse(treatment == 1, dgp_params$func(dose), 0)
+  # Observed outcomes
+  y2 <- ifelse(treatment == 1, y2_1, y2_0)
 
-  # Generate outcomes at time 2 (post-treatment)
-  treat_noise <- treatment_effect + rnorm(n, mean = 0, sd = 0.05)
-  noisy_treatment_effect <- treat_noise[treatment == 1]
-  y2 <- y1 + treat_noise
+  # Calculate change in outcomes (ΔY)
+  delta_y <- y2 - y1
 
-  # Calculate change in outcomes
-  dy <- y2 - y1
+  # Calculate ATT⁰
+  att_o <- mean(delta_y[treatment == 1]) - mean(delta_y[treatment == 0])
 
-  # Calculate true ATT
+  # Calculate true ATT and ACR
   pop_att <- dgp_params$E_func
-  samp_att <- mean(treatment_effect[treatment == 1])
-
-  # Calculate observed ATE (difference-in-differences)
-  diff_treated <- mean(dy[treatment == 1])
-  diff_control <- mean(dy[treatment == 0])
-  observed_ate <- diff_treated - diff_control
+  pop_acr <- dgp_params$E_deriv
 
   # Calculate true ACR
-  samp_acr <- mean(dgp_params$func_deriv(dose[dose > 0]))
-  pop_acr <- dgp_params$E_deriv
+
   x_grid <- seq(0, 1, length.out = 1000)
-    func_values <- dgp_params$func(x_grid)
+  func_values <- dgp_params$func(x_grid) + 2
   func_deriv_values <- dgp_params$func_deriv(x_grid)
 
+
   df <- data.frame(
-    y1 = y1,
-    y2 = y2,
-    dy = dy,
+    dy = delta_y,
     treatment = treatment,
-    dose = dose
+    dose = dose,
+    treatment_effect = treatment_effect
   )
 
   return(list(
     data = df,
     info = list(
       pop_att = pop_att,
-      obs_ate = observed_ate,
+      observed_att = att_o,
       pop_acr = pop_acr,
+      treatment_effect_func = dgp_params$func,
       func_values = func_values,
-      func_deriv_values = func_deriv_values,
-      noisy_treatment_effect = noisy_treatment_effect
+      func_deriv_values = func_deriv_values
     )
   ))
 }
 
 # # # Run the function
 # set.seed(123)  # for reproducibility
-# results <- gdata(100, dgp = 1)  # Replace 1 with the appropriate dgp value
-#
-# # Print results
-# cat("Population ATT:", results$pop_att, "\n")
-# cat("Sample ATT:", results$samp_att, "\n")
-# cat("Estimated ATE:", results$est_att, "\n")
-# cat("Population ACR:", results$pop_acr, "\n")
-# cat("Estimated ACR:", results$est_acr, "\n")
-
-
+# results <- gdata(100000, dgp = 4)
+# data <- results$data
+# mean(data$dy[data$treatment == 1]) - mean(data$dy[data$treatment == 0])
 
 # TWFE estimator
 run_twfe <- function(data) {
@@ -199,21 +183,28 @@ run_feols_bspline <- function(data) {
 }
 
 calculate_point_metrics <- function(estimate, true_value, se, lower_ci = NULL, upper_ci = NULL) {
-  # browser()
   bias <- estimate - true_value
-  rmse <- sqrt(bias^2)
+  squared_error <- bias^2
+  rmse <- sqrt(squared_error)
 
   if (is.null(lower_ci) || is.null(upper_ci)) {
-    coverage <- !is.na(se) && (true_value >= estimate - 1.96*se) && (true_value <= estimate + 1.96*se)
-  } else {
-    coverage <- (true_value >= lower_ci) && (true_value <= upper_ci)
+    lower_ci <- estimate - 1.96 * se
+    upper_ci <- estimate + 1.96 * se
   }
+
+  coverage <- (true_value >= lower_ci) && (true_value <= upper_ci)
+  ci_length <- upper_ci - lower_ci
 
   list(
     bias = bias,
     abs_bias = abs(bias),
+    squared_error = squared_error,
     rmse = rmse,
-    coverage = coverage
+    coverage = coverage,
+    se = se,
+    ci_length = ci_length,
+    lower_ci = lower_ci,
+    upper_ci = upper_ci
   )
 }
 

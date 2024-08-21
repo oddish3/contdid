@@ -7,10 +7,10 @@ run_simulation <- function(n, dgp, nrep) {
   ) %dorng% {
     # Generate data
     # set.seed(1234567)
-    dat <- gdata(n = n, dgp = 2)
+    dat <- gdata(n = n, dgp = dgp)
     data <- dat[["data"]]
     info <- dat[["info"]]
-    # write.csv(data, "/home/oddish3/Documents/uni/master-dissertation/code-cont/data.csv")
+    # write.csv(data, "/home/oddish3/Downloads/data.csv")
 
     # # Run estimators and calculate metrics
     # NPIV
@@ -42,7 +42,10 @@ run_simulation <- function(n, dgp, nrep) {
     x_grid <- seq(0, 1, length.out = length(info$func_values))
     closest_indices <- sapply(npiv_result$Xx, function(x) which.min(abs(x_grid - x)))
     h0 <- info$func_values[closest_indices]
+    # write.csv(h0, "/home/oddish3/Downloads/h0.csv")
     d0 <- info$func_deriv_values[closest_indices]
+    # write.csv(d0, "/home/oddish3/Downloads/d0.csv")
+
     true_functions <- data.frame(h0 = h0, d0 = d0)
     # write.csv(true_functions, "/home/oddish3/Documents/uni/master-dissertation/code-cont/r_true_functions.csv", row.names = FALSE)
     # Compute UCB coverage
