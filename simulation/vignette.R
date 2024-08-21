@@ -1,9 +1,20 @@
+rm(list=ls())
+devtools::load_all()
+library(contdid)
+library(tidyverse)
+source("~/Documents/uni/master-dissertation/contdid/simulation/DGP1.R")
 set.seed(123)  # for reproducibility
 results <- gdata(100, dgp = 4)
 data <- results$data
 info <- results$info
+# data <- data %>%
+#   filter((dose > 0.25 & dose < 0.75) | dose == 0) %>%
+#   mutate(dose = (dose - min(dose)) / (max(dose) - min(dose)))
 
+# debugonce(npiv_regression)
 npiv_result <- npiv_regression(data, "dose", "dy")
+npiv_result[["hzast"]]
+npiv_result[["dzast"]]
 
 mean(data$dy[data$treatment == 1]) - mean(data$dy[data$treatment == 0])
 npiv_result[["binarised"]][["estimate"]][["binary"]]

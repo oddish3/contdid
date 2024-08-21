@@ -14,7 +14,7 @@ data_filtered <- data %>%
   filter(year %in% c(2009, 2010))
 
 # Function to prepare data for DiD analysis
-prepare_data <- function(data, treat_prob = 0.8) {
+prepare_data <- function(data, treat_prob = 0.5) {
   n_units <- length(unique(data$la_name))
 
   # Generate treatment assignment
@@ -76,16 +76,16 @@ cat("True ATE (effect):", true_ate, "\n")
 cat("True ATT (deaths):", true_att, "\n")
 cat("Estimated effect (OLS):", estimated_effect, "\n")
 
-
 # Visualize the distribution of doses
 ggplot(prepared_data %>% filter(period == 2), aes(x = dose)) +
   geom_histogram(binwidth = 0.05) +
   labs(title = "Distribution of Treatment Doses", x = "Dose", y = "Count")
 
 # Visualize the treatment effect
-ggplot(prepared_data, aes(x = factor(period), y = deaths_sim, color = factor(treated))) +
+ggplot(prepared_data, aes(x = factor(period), y = deathrate_sim, color = factor(treated))) +
   geom_boxplot() +
   labs(title = "Deaths by Period and Treatment Status",
        x = "Period", y = "Deaths",
        color = "Treated") +
   theme_minimal()
+

@@ -160,7 +160,9 @@ npiv_regression <- function(data,
   # Compute critical value for UCB
   tryCatch({
     hzast <- ucb_cv(Ltil, Lhat, Px, PP, PP, CJ, CJ, y, n, 1000, 0, alpha)
+    # hzast <- ucb_cv(Ltil, Lhat, Px, PP, PP, CJ, CJ, y, nb = 1000, type = 0) #new
     dzast <- ucb_cv(Ltil, Lhat, Dx, PP, PP, CJ, CJ, y, n, 1000, 0, alpha)
+    # dzast <- ucb_cv(Ltil, Lhat, Dx, PP, PP, CJ, CJ, y, nb = 1000, type = 0) #new
     # write_debug_info("UCB critical values computed successfully")
   }, error = function(e) {
     # write_debug_info(paste("Error in computing UCB critical values:", e$message))
