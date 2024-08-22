@@ -1,0 +1,510 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /home/hoyt/projects/malaria/aejapplied/replication/longdiff/us/lon
+> gdiff.log
+  log type:  text
+ opened on:   2 Feb 2010, 15:10:41
+
+. 
+. 
+. use longdiff_us,clear
+
+. 
+. 
+. 
+. local malvar malmort1890
+
+. 
+. * OLS
+. 
+. run scatter4a `malvar'  "south lebergott99"  
+
+15:10:42 on  2 Feb 2010
+
+malmort1890
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------
+Model :       A           B
+# obs :       48          48   
+Depvar:     docc        dsei   
+-------------------------------
+mal        0.1124*     0.1343~ 
+         (0.0393)    (0.0652)  
+
+-------------------------------
+R-sq        0.514       0.246  
+===============================
+
+. run scatter4a `malvar'  "south imr1890 docs1898 spend infkof" 
+
+15:10:42 on  2 Feb 2010
+
+malmort1890
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------
+Model :       A           B
+# obs :       48          48   
+Depvar:     docc        dsei   
+-------------------------------
+mal        0.1001*     0.1443~ 
+         (0.0384)    (0.0670)  
+
+-------------------------------
+R-sq        0.639       0.336  
+===============================
+
+. run scatter4a `malvar'  "south aadlit91 chgterm chgptratio chgsal" 
+
+15:10:42 on  2 Feb 2010
+
+malmort1890
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------
+Model :       A           B
+# obs :       47          47   
+Depvar:     docc        dsei   
+-------------------------------
+mal        0.1356*     0.1309~ 
+         (0.0411)    (0.0623)  
+
+-------------------------------
+R-sq        0.617       0.435  
+===============================
+
+. run scatter4a `malvar'  "south aurb90 ablack91 unemp" 
+
+15:10:42 on  2 Feb 2010
+
+malmort1890
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------
+Model :       A           B
+# obs :       47          47   
+Depvar:     docc        dsei   
+-------------------------------
+mal        0.0942~     0.1146  
+         (0.0440)    (0.0633)  
+
+-------------------------------
+R-sq        0.655       0.373  
+===============================
+
+. run scatter4a `malvar'  "south lebergott99 l2 l3 imr1890 docs1898 spend infko
+> f aurb90 ablack91 unemp aadlit91 chgterm chgptratio chgsal" 
+
+15:10:42 on  2 Feb 2010
+
+malmort1890
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------
+Model :       A           B
+# obs :       46          46   
+Depvar:     docc        dsei   
+-------------------------------
+mal        0.1095~     0.1723  
+         (0.0490)    (0.0941)  
+
+-------------------------------
+R-sq        0.830       0.633  
+===============================
+
+. 
+. * 2SLS
+. 
+. run scatter4b `malvar' "south lebergott99 " "malecol mell malpc1920"
+
+15:10:42 on  2 Feb 2010
+
+malmort1890
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------
+Model :       A           B
+# obs :       47          47   
+Depvar:     docc        dsei   
+-------------------------------
+mal        0.1420*     0.1752~ 
+         (0.0541)    (0.0878)  
+
+-------------------------------
+R-sq        0.517        0.25  
+===============================
+
+. run scatter4b `malvar'  "south lebergott99"  "temp alt ta"
+
+15:10:42 on  2 Feb 2010
+
+malmort1890
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------
+Model :       A           B
+# obs :       48          48   
+Depvar:     docc        dsei   
+-------------------------------
+mal        0.1542      0.2086~ 
+         (0.0831)    (0.1036)  
+
+-------------------------------
+R-sq        0.506       0.229  
+===============================
+
+. run scatter4b `malvar' "south lebergott99 " "temp alt ta malecol mell malpc19
+> 20"
+
+15:10:42 on  2 Feb 2010
+
+malmort1890
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------
+Model :       A           B
+# obs :       47          47   
+Depvar:     docc        dsei   
+-------------------------------
+mal        0.1486*     0.1915~ 
+         (0.0541)    (0.0947)  
+
+-------------------------------
+R-sq        0.516       0.247  
+===============================
+
+. 
+. 
+. local malvar malecol_hong
+
+. 
+. * OLS
+. 
+. run scatter4a `malvar'  "south lebergott99"  
+
+15:10:42 on  2 Feb 2010
+
+malecol_hong
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------
+Model :       A           B
+# obs :       47          47   
+Depvar:     docc        dsei   
+-------------------------------
+mal        0.2355*     0.2186* 
+         (0.0315)    (0.0526)  
+
+-------------------------------
+R-sq        0.715       0.333  
+===============================
+
+. run scatter4a `malvar'  "south imr1890 docs1898 spend infkof" 
+
+15:10:42 on  2 Feb 2010
+
+malecol_hong
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------
+Model :       A           B
+# obs :       47          47   
+Depvar:     docc        dsei   
+-------------------------------
+mal        0.2252*     0.2797* 
+         (0.0313)    (0.0479)  
+
+-------------------------------
+R-sq        0.777       0.454  
+===============================
+
+. run scatter4a `malvar'  "south aadlit91 chgterm chgptratio chgsal" 
+
+15:10:42 on  2 Feb 2010
+
+malecol_hong
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------
+Model :       A           B
+# obs :       46          46   
+Depvar:     docc        dsei   
+-------------------------------
+mal        0.2192*     0.2058* 
+         (0.0267)    (0.0552)  
+
+-------------------------------
+R-sq        0.793       0.531  
+===============================
+
+. run scatter4a `malvar'  "south aurb90 ablack91 unemp" 
+
+15:10:42 on  2 Feb 2010
+
+malecol_hong
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------
+Model :       A           B
+# obs :       47          47   
+Depvar:     docc        dsei   
+-------------------------------
+mal        0.2036*     0.1778* 
+         (0.0286)    (0.0682)  
+
+-------------------------------
+R-sq          0.8       0.428  
+===============================
+
+. run scatter4a `malvar'  "south lebergott99 l2 l3 imr1890 docs1898 spend infko
+> f aurb90 ablack91 unemp aadlit91 chgterm chgptratio chgsal" 
+
+15:10:42 on  2 Feb 2010
+
+malecol_hong
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------
+Model :       A           B
+# obs :       46          46   
+Depvar:     docc        dsei   
+-------------------------------
+mal        0.2145*     0.2645* 
+         (0.0494)    (0.0962)  
+
+-------------------------------
+R-sq        0.868       0.653  
+===============================
+
+. 
+. * 2SLS
+. 
+. run scatter4b `malvar' "south lebergott99 " "malmort1890 mell malpc1920"
+
+15:10:42 on  2 Feb 2010
+
+malecol_hong
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------
+Model :       A           B
+# obs :       47          47   
+Depvar:     docc        dsei   
+-------------------------------
+mal        0.2068*     0.2435~ 
+         (0.0595)    (0.1061)  
+
+-------------------------------
+R-sq        0.711       0.331  
+===============================
+
+. run scatter4b `malvar' "south lebergott99 " "temp alt ta"
+
+15:10:42 on  2 Feb 2010
+
+malecol_hong
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------
+Model :       A           B
+# obs :       47          47   
+Depvar:     docc        dsei   
+-------------------------------
+mal        0.1382~     0.1735~ 
+         (0.0590)    (0.0754)  
+
+-------------------------------
+R-sq         0.67       0.327  
+===============================
+
+. run scatter4b `malvar' "south lebergott99 " "temp alt ta malmort1890 mell mal
+> pc1920"
+
+15:10:42 on  2 Feb 2010
+
+malecol_hong
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------
+Model :       A           B
+# obs :       47          47   
+Depvar:     docc        dsei   
+-------------------------------
+mal        0.1639*     0.1854* 
+         (0.0520)    (0.0706)  
+
+-------------------------------
+R-sq        0.691        0.33  
+===============================
+
+. 
+. 
+. 
+. 
+. generate byte border = 0
+
+. replace border = 1 if state2=="NM"
+(1 real change made)
+
+. replace border = 1 if state2=="OK"
+(1 real change made)
+
+. replace border = 1 if state2=="MO"
+(1 real change made)
+
+. replace border = 1 if state2=="IL"
+(1 real change made)
+
+. replace border = 1 if state2=="IN"
+(1 real change made)
+
+. replace border = 1 if state2=="OH"
+(1 real change made)
+
+. replace border = 1 if state2=="MD"
+(1 real change made)
+
+. replace border = 1 if state2=="DE"
+(1 real change made)
+
+. replace border = 1 if state2=="PA"
+(1 real change made)
+
+. 
+. 
+. 
+. **** SOUTH+BORDER
+. preserve
+
+. keep if south | border
+(29 observations deleted)
+
+. local malvar malmort1890
+
+. run scatter4a `malvar'  "south lebergott99 l2 l3 imr1890 docs1898 spend infko
+> f aurb90 ablack91 unemp aadlit91 chgterm chgptratio chgsal" 
+
+15:10:42 on  2 Feb 2010
+
+malmort1890
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------
+Model :       A           B
+# obs :       21          21   
+Depvar:     docc        dsei   
+-------------------------------
+mal        0.0997*     0.1734* 
+         (0.0380)    (0.0379)  
+
+-------------------------------
+R-sq        0.985       0.981  
+===============================
+
+. local malvar malecol_hong
+
+. run scatter4a `malvar'  "south lebergott99 l2 l3 imr1890 docs1898 spend infko
+> f aurb90 ablack91 unemp aadlit91 chgterm chgptratio chgsal" 
+
+15:10:42 on  2 Feb 2010
+
+malecol_hong
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------
+Model :       A           B
+# obs :       21          21   
+Depvar:     docc        dsei   
+-------------------------------
+mal        0.2078~     0.2034  
+         (0.0860)    (0.2362)  
+
+-------------------------------
+R-sq        0.984       0.934  
+===============================
+
+. restore
+
+. 
+. **** NON-SOUTH and NON-BORDER
+. preserve
+
+. drop if south | border
+(22 observations deleted)
+
+. local malvar malmort1890
+
+. run scatter4a `malvar'  "south lebergott99 l2 l3 imr1890 docs1898 spend infko
+> f aurb90 ablack91 unemp aadlit91 chgterm chgptratio chgsal" 
+
+15:10:42 on  2 Feb 2010
+
+malmort1890
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------
+Model :       A           B
+# obs :       25          25   
+Depvar:     docc        dsei   
+-------------------------------
+mal        0.1832      0.1335  
+         (0.2764)    (0.4078)  
+
+-------------------------------
+R-sq        0.748       0.717  
+===============================
+
+. local malvar malecol_hong
+
+. run scatter4a `malvar'  "south lebergott99 l2 l3 imr1890 docs1898 spend infko
+> f aurb90 ablack91 unemp aadlit91 chgterm chgptratio chgsal" 
+
+15:10:42 on  2 Feb 2010
+
+malecol_hong
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------
+Model :       A           B
+# obs :       25          25   
+Depvar:     docc        dsei   
+-------------------------------
+mal        0.1621      0.2812  
+         (0.2118)    (0.3383)  
+
+-------------------------------
+R-sq        0.753       0.745  
+===============================
+
+. restore
+
+. 
+. 
+. log close
+      name:  <unnamed>
+       log:  /home/hoyt/projects/malaria/aejapplied/replication/longdiff/us/lon
+> gdiff.log
+  log type:  text
+ closed on:   2 Feb 2010, 15:10:42
+-------------------------------------------------------------------------------

@@ -1,0 +1,578 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /home/hoyt/projects/malaria/aejapplied/replication/longdiff/co/lon
+> gdiff.log
+  log type:  text
+ opened on:   3 Feb 2010, 10:10:25
+
+. 
+. 
+. * basic results:
+. 
+. clear
+
+. set more 1
+
+. set mem 25m
+(25600k)
+
+. set matsize 800
+
+. 
+. 
+. use longdiff_col,clear
+
+. 
+. 
+. local holdridge = "ecozone_stdry ecozone_stwet ecozone_trdry ecozone_trwet ec
+> ozone_warm"
+
+. 
+. local conflict =   "vioearly violate "
+
+. local conflict2 =  "vioe=vioearly viol=violate "
+
+. 
+. local endowment =  "cafetera carbon ganadera_neuva mktaccess manuf nivel_de_v
+> ida lndens"
+
+. local endowment2 = "cafe=cafetera carbon ganad=ganadera_neuva mkta=mktaccess 
+> manuf nivel=nivel_de_vida dens=lndens"
+
+. 
+. local both =       "`conflict' `endowment'"
+
+. local both2 =      "`conflict2' `endowment2'"
+
+. 
+. local diseases =   "helminth_nh hookworm leishmaniasis yelfev"
+
+. local diseases2 =  "helmnh=helminth_nh hook=hookworm leish=leishmaniasis yelf
+> ev"
+
+. 
+. local allthree = "helm hook leish yel land vio* cafetera carbon ganad mkta ma
+> nuf nivel"
+
+. 
+. 
+. **** first with poveda measure
+. 
+. xi i.bplreg 
+i.bplregcol       _Ibplregcol_1-10    (naturally coded; _Ibplregcol_1 omitted)
+
+. run scatter1a "_I* " "Reg56"
+
+10:10:25 on  3 Feb 2010
+
+_I*
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           C           G
+# obs :      522         522         521   
+Depvar:     dlit        dsch      dscore   
+-------------------------------------------
+mal         0.035*      0.168       0.064* 
+          (0.012)     (0.088)     (0.011)  
+
+Reg56       Yes         Yes         Yes    
+            ---         ---         ---    
+
+-------------------------------------------
+R-sq        0.225       0.206       0.196  
+===========================================
+
+. run scatter1a "_I* `conflict'" "Reg56 `conflict2'"
+
+10:10:25 on  3 Feb 2010
+
+_I* vioearly violate
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           C           G
+# obs :      522         522         521   
+Depvar:     dlit        dsch      dscore   
+-------------------------------------------
+mal         0.032*      0.175       0.063* 
+          (0.012)     (0.090)     (0.011)  
+
+vioe        0.010*     -0.017       0.001  
+          (0.003)     (0.028)     (0.004)  
+
+viol       -0.006*      0.007       0.004  
+          (0.002)     (0.019)     (0.002)  
+
+Reg56       Yes         Yes         Yes    
+            ---         ---         ---    
+
+-------------------------------------------
+R-sq        0.237       0.206       0.202  
+===========================================
+
+. run scatter1a "_I* `endowment'" "Reg56 cafe=cafetera carbon ganad=ganadera_ne
+> uva mkta=mktaccess manuf nivel=nivel_de_vida"
+
+10:10:25 on  3 Feb 2010
+
+_I* cafetera carbon ganadera_neuva mktaccess manuf nivel_de_vida lndens
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           C           G
+# obs :      508         508         507   
+Depvar:     dlit        dsch      dscore   
+-------------------------------------------
+mal         0.008       0.194~      0.058* 
+          (0.010)     (0.090)     (0.012)  
+
+cafe       -0.006      -0.275*     -0.009  
+          (0.008)     (0.062)     (0.008)  
+
+carbon      0.018~      0.094       0.000  
+          (0.009)     (0.085)     (0.011)  
+
+ganad      -0.004      -0.351*     -0.026  
+          (0.013)     (0.099)     (0.014)  
+
+mkta        0.001       0.005       0.000  
+          (0.002)     (0.013)     (0.002)  
+
+manuf      -1.422*      2.330      -0.273  
+          (0.299)     (2.488)     (0.284)  
+
+nivel       0.012*      0.017       0.004  
+          (0.003)     (0.025)     (0.003)  
+
+Reg56       Yes         Yes         Yes    
+            ---         ---         ---    
+
+-------------------------------------------
+R-sq        0.413       0.275       0.219  
+===========================================
+
+. run scatter1a "_I* `diseases'" "Reg56 `diseases2'"
+
+10:10:25 on  3 Feb 2010
+
+_I* helminth_nh hookworm leishmaniasis yelfev
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           C           G
+# obs :      522         522         521   
+Depvar:     dlit        dsch      dscore   
+-------------------------------------------
+mal         0.024       0.180~      0.065* 
+          (0.013)     (0.089)     (0.012)  
+
+helmnh      0.029       0.067       0.046  
+          (0.036)     (0.256)     (0.028)  
+
+hook        0.041*     -0.043       0.001  
+          (0.013)     (0.106)     (0.013)  
+
+leish      -0.017       0.203       0.012  
+          (0.015)     (0.140)     (0.014)  
+
+yelfev      0.006      -0.144      -0.022  
+          (0.014)     (0.145)     (0.015)  
+
+Reg56       Yes         Yes         Yes    
+            ---         ---         ---    
+
+-------------------------------------------
+R-sq        0.248       0.213       0.205  
+===========================================
+
+. run scatter1a "_I* `allthree'" "Reg56 All3 "
+
+10:10:25 on  3 Feb 2010
+
+_I* helm hook leish yel land vio* cafetera carbon ganad mkta manuf nivel
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           C           G
+# obs :      521         521         520   
+Depvar:     dlit        dsch      dscore   
+-------------------------------------------
+mal         0.006       0.165       0.064* 
+          (0.011)     (0.095)     (0.013)  
+
+Reg56       Yes         Yes         Yes    
+            ---         ---         ---    
+
+All3        Yes         Yes         Yes    
+            ---         ---         ---    
+
+-------------------------------------------
+R-sq        0.388        0.28       0.235  
+===========================================
+
+. 
+. run scatter1b "_I*" "Reg56" "temp alt at" "poveda"
+
+10:10:25 on  3 Feb 2010
+
+_I*
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           C           G
+# obs :      492         492         491   
+Depvar:     dlit        dsch      dscore   
+-------------------------------------------
+mal         0.037~      0.372*      0.092* 
+          (0.018)     (0.136)     (0.017)  
+
+Reg56       Yes         Yes         Yes    
+            ---         ---         ---    
+
+-------------------------------------------
+R-sq         0.24        0.21       0.192  
+===========================================
+
+. run scatter1b "_I*" "Reg56" "mell"        "poveda"
+
+10:10:26 on  3 Feb 2010
+
+_I*
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           C           G
+# obs :      522         522         521   
+Depvar:     dlit        dsch      dscore   
+-------------------------------------------
+mal         0.125*      0.113       0.084* 
+          (0.032)     (0.190)     (0.026)  
+
+Reg56       Yes         Yes         Yes    
+            ---         ---         ---    
+
+-------------------------------------------
+R-sq        0.126       0.205       0.191  
+===========================================
+
+. run scatter1b "_I*" "Reg56" "`holdridge'" "poveda"
+
+10:10:26 on  3 Feb 2010
+
+_I*
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           C           G
+# obs :      522         522         521   
+Depvar:     dlit        dsch      dscore   
+-------------------------------------------
+mal         0.045~      0.303       0.102* 
+          (0.021)     (0.159)     (0.020)  
+
+Reg56       Yes         Yes         Yes    
+            ---         ---         ---    
+
+-------------------------------------------
+R-sq        0.224       0.202       0.177  
+===========================================
+
+. run scatter1b "_I*" "Reg56" "temp alt at mell `holdridge' m46 areamal" "poved
+> a"
+
+10:10:26 on  3 Feb 2010
+
+_I*
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           C           G
+# obs :      492         492         491   
+Depvar:     dlit        dsch      dscore   
+-------------------------------------------
+mal         0.049*      0.323*      0.092* 
+          (0.018)     (0.122)     (0.016)  
+
+Reg56       Yes         Yes         Yes    
+            ---         ---         ---    
+
+-------------------------------------------
+R-sq        0.235       0.213       0.192  
+===========================================
+
+. 
+. 
+. 
+. **** now with mellinger measure
+. 
+. xi i.bplreg 
+i.bplregcol       _Ibplregcol_1-10    (naturally coded; _Ibplregcol_1 omitted)
+
+. run scatter1a "_I* " "Reg56" mell
+
+10:10:26 on  3 Feb 2010
+
+_I*
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           C           G
+# obs :      522         522         521   
+Depvar:     dlit        dsch      dscore   
+-------------------------------------------
+mal         0.071*      0.064       0.048* 
+          (0.016)     (0.108)     (0.014)  
+
+Reg56       Yes         Yes         Yes    
+            ---         ---         ---    
+
+-------------------------------------------
+R-sq        0.257         0.2       0.164  
+===========================================
+
+. run scatter1a "_I* `conflict'" "Reg56 `conflict2'" mell
+
+10:10:26 on  3 Feb 2010
+
+_I* vioearly violate
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           C           G
+# obs :      522         522         521   
+Depvar:     dlit        dsch      dscore   
+-------------------------------------------
+mal         0.068*      0.068       0.046* 
+          (0.016)     (0.110)     (0.014)  
+
+vioe        0.009*     -0.012       0.002  
+          (0.003)     (0.028)     (0.004)  
+
+viol       -0.005~      0.007       0.004  
+          (0.002)     (0.019)     (0.002)  
+
+Reg56       Yes         Yes         Yes    
+            ---         ---         ---    
+
+-------------------------------------------
+R-sq        0.267       0.201       0.172  
+===========================================
+
+. run scatter1a "_I* `endowment'" "Reg56 cafe=cafetera carbon ganad=ganadera_ne
+> uva mkta=mktaccess manuf nivel=nivel_de_vida" mell
+
+10:10:26 on  3 Feb 2010
+
+_I* cafetera carbon ganadera_neuva mktaccess manuf nivel_de_vida lndens
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           C           G
+# obs :      508         508         507   
+Depvar:     dlit        dsch      dscore   
+-------------------------------------------
+mal         0.043*      0.156       0.039* 
+          (0.013)     (0.110)     (0.014)  
+
+cafe       -0.005      -0.295*     -0.015  
+          (0.007)     (0.061)     (0.008)  
+
+carbon      0.017        0.10       0.002  
+          (0.009)     (0.084)     (0.011)  
+
+ganad      -0.013      -0.344*     -0.022  
+          (0.013)     (0.101)     (0.015)  
+
+mkta        0.001       0.005       0.000  
+          (0.002)     (0.013)     (0.002)  
+
+manuf      -1.488*      2.203      -0.299  
+          (0.299)     (2.476)     (0.274)  
+
+nivel       0.011*      0.013       0.003  
+          (0.003)     (0.025)     (0.003)  
+
+Reg56       Yes         Yes         Yes    
+            ---         ---         ---    
+
+-------------------------------------------
+R-sq        0.426       0.271       0.194  
+===========================================
+
+. run scatter1a "_I* `diseases'" "Reg56 `diseases2'" mell
+
+10:10:26 on  3 Feb 2010
+
+_I* helminth_nh hookworm leishmaniasis yelfev
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           C           G
+# obs :      522         522         521   
+Depvar:     dlit        dsch      dscore   
+-------------------------------------------
+mal         0.058*      0.057       0.042* 
+          (0.016)     (0.114)     (0.015)  
+
+helmnh      0.007      -0.028       0.008  
+          (0.035)     (0.255)     (0.028)  
+
+hook        0.034*      0.025       0.019  
+          (0.013)     (0.106)     (0.013)  
+
+leish      -0.016       0.214       0.016  
+          (0.014)     (0.139)     (0.014)  
+
+yelfev      0.001      -0.165      -0.031~ 
+          (0.013)     (0.147)     (0.015)  
+
+Reg56       Yes         Yes         Yes    
+            ---         ---         ---    
+
+-------------------------------------------
+R-sq        0.269       0.208       0.173  
+===========================================
+
+. run scatter1a "_I* `allthree'" "Reg56 All3 " mell
+
+10:10:26 on  3 Feb 2010
+
+_I* helm hook leish yel land vio* cafetera carbon ganad mkta manuf nivel
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           C           G
+# obs :      521         521         520   
+Depvar:     dlit        dsch      dscore   
+-------------------------------------------
+mal         0.046*      0.076       0.034~ 
+          (0.015)     (0.117)     (0.015)  
+
+Reg56       Yes         Yes         Yes    
+            ---         ---         ---    
+
+All3        Yes         Yes         Yes    
+            ---         ---         ---    
+
+-------------------------------------------
+R-sq        0.401       0.277       0.207  
+===========================================
+
+. 
+. run scatter1b "_I*" "Reg56" "temp alt at" "mell"
+
+10:10:26 on  3 Feb 2010
+
+_I*
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           C           G
+# obs :      492         492         491   
+Depvar:     dlit        dsch      dscore   
+-------------------------------------------
+mal         0.067       0.766*      0.170* 
+          (0.036)     (0.268)     (0.037)  
+
+Reg56       Yes         Yes         Yes    
+            ---         ---         ---    
+
+-------------------------------------------
+R-sq        0.271       0.135       0.003  
+===========================================
+
+. run scatter1b "_I*" "Reg56" "poveda"        "mell"
+
+10:10:26 on  3 Feb 2010
+
+_I*
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           C           G
+# obs :      522         522         521   
+Depvar:     dlit        dsch      dscore   
+-------------------------------------------
+mal         0.082*      0.390       0.149* 
+          (0.029)     (0.203)     (0.028)  
+
+Reg56       Yes         Yes         Yes    
+            ---         ---         ---    
+
+-------------------------------------------
+R-sq        0.256       0.184        0.06  
+===========================================
+
+. run scatter1b "_I*" "Reg56" "`holdridge'" "mell"
+
+10:10:26 on  3 Feb 2010
+
+_I*
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           C           G
+# obs :      522         522         521   
+Depvar:     dlit        dsch      dscore   
+-------------------------------------------
+mal         0.082~      0.593~      0.124* 
+          (0.037)     (0.248)     (0.035)  
+
+Reg56       Yes         Yes         Yes    
+            ---         ---         ---    
+
+-------------------------------------------
+R-sq        0.256       0.156       0.104  
+===========================================
+
+. run scatter1b "_I*" "Reg56" "temp alt at poveda `holdridge' m46 areamal" "mel
+> l"
+
+10:10:26 on  3 Feb 2010
+
+_I*
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           C           G
+# obs :      492         492         491   
+Depvar:     dlit        dsch      dscore   
+-------------------------------------------
+mal         0.074*      0.516*      0.120* 
+          (0.026)     (0.184)     (0.025)  
+
+Reg56       Yes         Yes         Yes    
+            ---         ---         ---    
+
+-------------------------------------------
+R-sq        0.271       0.181       0.108  
+===========================================
+
+. 
+. 
+. log close
+      name:  <unnamed>
+       log:  /home/hoyt/projects/malaria/aejapplied/replication/longdiff/co/lon
+> gdiff.log
+  log type:  text
+ closed on:   3 Feb 2010, 10:10:26
+-------------------------------------------------------------------------------

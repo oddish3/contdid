@@ -22,7 +22,7 @@ source("~/Documents/uni/master-dissertation/contdid/simulation/run_simulation.R"
 seed1 <- 1234
 set.seed(seed1)
 n <- c(100, 500, 1000,2500)
-nrep <- 1
+nrep <- 1000
 
 # Create cluster
 cl <- makeCluster(detectCores() - 1)

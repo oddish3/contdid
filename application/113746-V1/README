@@ -1,0 +1,32 @@
+This directory contains files necessary to estimate the models in the
+following paper:
+
+     Bleakley, Hoyt. 2010. "Malaria Eradication in the Americas: A
+     Retrospective Analysis of Childhood Exposure," American Economic
+     Journal: Applied.
+
+The files needed to estimate models in Section 3 ("Pre/Post
+Comparisons") are found in the directory "longdiff".  Files for each
+country are grouped by subdirectory.  The longdiff*dta files are stata
+(v11) data files, and the longdiff*.do are stata programs that
+estimate the models.  The unit of observation for these data are state
+of birth.  The demographic outcome variables are constructed as
+changes from the early (unexposed) to late (exposed) cohorts.  
+
+The files needed to estimate models in Section 4 ("Panel Estimates")
+are found in the directory "panel".  Files for each country are
+denoted in the filename with two-letter country abbreviations.  The
+panel*dta files are stata (v11) data files, and the panel_results.do
+is a stata program that estimates the models.
+
+The unit of observation for these data are state of birth times year
+of birth times census year.  (The data are therefore a 3-dimensional
+panel.)  The demographic outcome variables are averages within these
+cells.
+
+Note that these are all aggregated datasets.  The original source data
+and the details of aggregation are described in Section 3 and in the
+Appendix.  
+
+Log files for the stata estimation programs are provided in each
+directory for convenience.

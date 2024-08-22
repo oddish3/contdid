@@ -1,0 +1,174 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /home/hoyt/projects/malaria/aejapplied/replication/longdiff/mx/lon
+> gdiff_mx.log
+  log type:  text
+ opened on:   2 Feb 2010, 15:04:05
+
+. 
+. clear
+
+. set more 1
+
+. set mem 100m
+
+Current memory allocation
+-------------------------
+
+                    current                                 memory usage
+    settable          value     description                 (1M = 1024k)
+    --------------------------------------------------------------------
+    set maxvar         5000     max. variables allowed           1.790M
+    set memory          100M    max. data space                100.000M
+    set matsize         800     max. RHS vars in models          4.950M
+                                                            -----------
+                                                               106.740M
+
+. 
+. use longdiff_mx,clear
+
+. 
+. local excliv "tempavg altitude ta rainmm tr ar"
+
+. 
+. * basic
+. run scatter3a "lnele norte sur " 
+
+15:04:05 on  2 Feb 2010
+
+lnele norte sur
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           B           D
+# obs :       32          32          32   
+Depvar:     dlit        dsch    dincearn   
+-------------------------------------------
+mal         0.114*      0.059       0.291~ 
+          (0.033)     (0.298)     (0.113)  
+
+-------------------------------------------
+R-sq        0.399       0.306       0.221  
+===========================================
+
+. 
+. local extravars inmort
+
+. run scatter3a "`extravars' lnele norte sur " 
+
+15:04:05 on  2 Feb 2010
+
+inmort lnele norte sur
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           B           D
+# obs :       32          32          32   
+Depvar:     dlit        dsch    dincearn   
+-------------------------------------------
+mal         0.120*      0.136       0.285~ 
+          (0.032)     (0.237)     (0.111)  
+
+-------------------------------------------
+R-sq        0.441       0.429        0.23  
+===========================================
+
+. 
+. local extravars "eaag eaexin eaintr eatran easer eaoth"
+
+. run scatter3a "`extravars' lnele norte sur " 
+
+15:04:05 on  2 Feb 2010
+
+eaag eaexin eaintr eatran easer eaoth lnele norte sur
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           B           D
+# obs :       32          32          32   
+Depvar:     dlit        dsch    dincearn   
+-------------------------------------------
+mal         0.033      -0.233       0.196  
+          (0.038)     (0.248)     (0.134)  
+
+-------------------------------------------
+R-sq        0.726        0.66       0.431  
+===========================================
+
+. 
+. local extravars "inmort eaag eaexin eaintr eatran easer eaoth ea dens"
+
+. run scatter3a "`extravars' lnele norte sur " 
+
+15:04:05 on  2 Feb 2010
+
+inmort eaag eaexin eaintr eatran easer eaoth ea dens lnele norte sur
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           B           D
+# obs :       32          32          32   
+Depvar:     dlit        dsch    dincearn   
+-------------------------------------------
+mal         0.034      -0.248       0.254  
+          (0.035)     (0.259)     (0.146)  
+
+-------------------------------------------
+R-sq        0.768       0.738       0.570  
+===========================================
+
+. 
+. run scatter4a "lnele norte sur "  "`excliv'"
+
+15:04:05 on  2 Feb 2010
+
+lnele norte sur
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           B           D
+# obs :       29          29          29   
+Depvar:     dlit        dsch    dincearn   
+-------------------------------------------
+mal         0.127~      0.111       0.494~ 
+          (0.056)     (0.648)     (0.197)  
+
+-------------------------------------------
+R-sq        0.367       0.358       0.175  
+===========================================
+
+. run scatter4a "`extravars' lnele norte sur "  "`excliv'"
+
+15:04:05 on  2 Feb 2010
+
+inmort eaag eaexin eaintr eatran easer eaoth ea dens lnele norte sur
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------
+Model :       A           B           D
+# obs :       29          29          29   
+Depvar:     dlit        dsch    dincearn   
+-------------------------------------------
+mal         0.049      -0.235       0.397~ 
+          (0.043)     (0.510)     (0.176)  
+
+-------------------------------------------
+R-sq         0.78       0.747       0.635  
+===========================================
+
+. 
+. 
+. 
+. log close
+      name:  <unnamed>
+       log:  /home/hoyt/projects/malaria/aejapplied/replication/longdiff/mx/lon
+> gdiff_mx.log
+  log type:  text
+ closed on:   2 Feb 2010, 15:04:05
+-------------------------------------------------------------------------------

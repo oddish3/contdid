@@ -1,0 +1,175 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /home/hoyt/projects/malaria/aejapplied/replication/longdiff/br/lon
+> gdiff_br.log
+  log type:  text
+ opened on:   2 Feb 2010, 14:57:43
+
+. 
+. clear
+
+. set more 1
+
+. set mem 100m
+
+Current memory allocation
+-------------------------
+
+                    current                                 memory usage
+    settable          value     description                 (1M = 1024k)
+    --------------------------------------------------------------------
+    set maxvar         5000     max. variables allowed           1.790M
+    set memory          100M    max. data space                100.000M
+    set matsize         400     max. RHS vars in models          1.254M
+                                                            -----------
+                                                               103.044M
+
+. 
+. use longdiff_br
+
+. 
+. xi i.bplreg
+i.bplregbr        _Ibplregbr_1-5      (naturally coded; _Ibplregbr_1 omitted)
+
+. 
+. * basic
+. run scatter3a "lnele _Ib*  [aw=wtbpl] " 
+
+14:57:43 on  2 Feb 2010
+
+lnele _Ib* [aw=wtbpl]
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------------------
+Model :       A           B           C           D
+# obs :       24          24          24          24   
+Depvar:     dlit        dsch     dinctot    dincearn   
+-------------------------------------------------------
+mal         0.063       0.552       0.352~      0.267~ 
+          (0.063)     (0.606)     (0.174)     (0.130)  
+
+-------------------------------------------------------
+R-sq        0.506       0.615       0.323       0.324  
+=======================================================
+
+. 
+. local extravars inmort
+
+. run scatter3a "`extravars' lnele _Ib*  [aw=wtbpl] " 
+
+14:57:43 on  2 Feb 2010
+
+inmort lnele _Ib* [aw=wtbpl]
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------------------
+Model :       A           B           C           D
+# obs :       24          24          24          24   
+Depvar:     dlit        dsch     dinctot    dincearn   
+-------------------------------------------------------
+mal         0.063       0.578       0.366~      0.262  
+          (0.064)     (0.581)     (0.145)     (0.135)  
+
+-------------------------------------------------------
+R-sq        0.506       0.628        0.47        0.34  
+=======================================================
+
+. 
+. local extravars "eaag eaexin eaintr eatran easer eaoth"
+
+. run scatter3a "`extravars' lnele _Ib*  [aw=wtbpl] " 
+
+14:57:44 on  2 Feb 2010
+
+eaag eaexin eaintr eatran easer eaoth lnele _Ib* [aw=wtbpl]
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------------------
+Model :       A           B           C           D
+# obs :       24          24          24          24   
+Depvar:     dlit        dsch     dinctot    dincearn   
+-------------------------------------------------------
+mal         0.132*      1.287~      0.434~      0.283* 
+          (0.044)     (0.599)     (0.181)     (0.092)  
+
+-------------------------------------------------------
+R-sq        0.822       0.851       0.453       0.414  
+=======================================================
+
+. 
+. local extravars "inmort eaag eaexin eaintr eatran easer eaoth ea dens"
+
+. run scatter3a "`extravars' lnele _Ib*  [aw=wtbpl] " 
+
+14:57:44 on  2 Feb 2010
+
+inmort eaag eaexin eaintr eatran easer eaoth ea dens lnele _Ib* [aw=wtbpl]
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------------------
+Model :       A           B           C           D
+# obs :       24          24          24          24   
+Depvar:     dlit        dsch     dinctot    dincearn   
+-------------------------------------------------------
+mal         0.149*      0.994~      0.390~      0.280  
+          (0.043)     (0.485)     (0.177)     (0.147)  
+
+-------------------------------------------------------
+R-sq        0.836       0.878       0.572       0.447  
+=======================================================
+
+. 
+. local excliv "tempavg altitude ta"
+
+. run scatter4a "lnele dens _Ib*  [aw=wtbpl] "  "`excliv'"
+
+14:57:44 on  2 Feb 2010
+
+lnele dens _Ib* [aw=wtbpl]
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------------------
+Model :       A           B           C           D
+# obs :       24          24          24          24   
+Depvar:     dlit        dsch     dinctot    dincearn   
+-------------------------------------------------------
+mal         0.227      -1.354       0.650       0.433  
+          (0.215)     (2.162)     (0.334)     (0.335)  
+
+-------------------------------------------------------
+R-sq        0.416       0.495        0.33       0.281  
+=======================================================
+
+. run scatter4a "`extravars' lnele dens _Ib*  [aw=wtbpl] "  "`excliv'"
+
+14:57:44 on  2 Feb 2010
+
+inmort eaag eaexin eaintr eatran easer eaoth ea dens lnele dens _Ib* [aw=wtbpl]
+
+
+(standard errors in parentheses with p<0.05 = ~, p<0.01 = *)
+-------------------------------------------------------
+Model :       A           B           C           D
+# obs :       24          24          24          24   
+Depvar:     dlit        dsch     dinctot    dincearn   
+-------------------------------------------------------
+mal         0.215       0.258       0.787       0.497  
+          (0.119)     (0.979)     (0.413)     (0.329)  
+
+-------------------------------------------------------
+R-sq        0.826       0.865       0.441       0.402  
+=======================================================
+
+. 
+. log close
+      name:  <unnamed>
+       log:  /home/hoyt/projects/malaria/aejapplied/replication/longdiff/br/lon
+> gdiff_br.log
+  log type:  text
+ closed on:   2 Feb 2010, 14:57:44
+-------------------------------------------------------------------------------
