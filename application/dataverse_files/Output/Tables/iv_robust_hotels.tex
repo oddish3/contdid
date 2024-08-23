@@ -1,0 +1,58 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{OLS results for the change in the share of non-discriminatory hotels}
+\begin{tabular}{l*{4}{c}}
+\hline\hline
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
+                    &\multicolumn{1}{c}{a\_d\_gbhotel5060}&\multicolumn{1}{c}{a\_delta\_shrhotel}&\multicolumn{1}{c}{a\_pct\_d\_shrhotel}&\multicolumn{1}{c}{a\_d\_gbhotel4050}\\
+\hline
+a\_d\_blackshr5060    &      0.0880\sym{*}  &                     &                     &                     \\
+                    &     (0.050)         &                     &                     &                     \\
+[1em]
+a\_delta\_shrblack    &                     &      0.0744         &                     &                     \\
+                    &                     &     (0.046)         &                     &                     \\
+[1em]
+a\_pct\_d\_shrblack    &                     &                     &       0.633\sym{***}&                     \\
+                    &                     &                     &     (0.199)         &                     \\
+[1em]
+a\_d\_blackshr4050    &                     &                     &                     &      0.0709\sym{***}\\
+                    &                     &                     &                     &     (0.025)         \\
+\hline
+Observations        &        1235         &        1909         &         161         &        1909         \\
+Adjusted \(R^{2}\)  &       0.016         &       0.012         &       0.220         &       0.004         \\
+widstat             &                     &                     &                     &                     \\
+\hline\hline
+\multicolumn{5}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{5}{l}{\footnotesize Standard errors in parentheses.}\\
+\multicolumn{5}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{IV results for the change in the share of non-discriminatory hotels}
+\begin{tabular}{l*{4}{c}}
+\hline\hline
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
+                    &\multicolumn{1}{c}{a\_d\_gbhotel5060}&\multicolumn{1}{c}{a\_delta\_shrhotel}&\multicolumn{1}{c}{a\_pct\_d\_shrhotel}&\multicolumn{1}{c}{a\_d\_gbhotel4050}\\
+\hline
+a\_d\_blackshr5060    &       0.375         &                     &                     &                     \\
+                    &     (0.315)         &                     &                     &                     \\
+[1em]
+a\_delta\_shrblack    &                     &       0.620         &                     &                     \\
+                    &                     &     (0.542)         &                     &                     \\
+[1em]
+a\_pct\_d\_shrblack    &                     &                     &       3.336\sym{**} &                     \\
+                    &                     &                     &     (1.392)         &                     \\
+[1em]
+a\_d\_blackshr4050    &                     &                     &                     &       0.233\sym{***}\\
+                    &                     &                     &                     &     (0.089)         \\
+\hline
+Observations        &        1235         &        1909         &         161         &        1909         \\
+Adjusted \(R^{2}\)  &      -0.053         &      -0.104         &      -2.181         &      -0.046         \\
+widstat             &       30.98         &       13.94         &       4.767         &       159.1         \\
+\hline\hline
+\multicolumn{5}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{5}{l}{\footnotesize Standard errors in parentheses.}\\
+\multicolumn{5}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}

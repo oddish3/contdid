@@ -1,0 +1,86 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{OLS results for the change in the share of non-discriminatory hotels}
+\begin{tabular}{l*{6}{c}}
+\hline\hline
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}\\
+                    &\multicolumn{1}{c}{a\_d\_gbhotel4050}&\multicolumn{1}{c}{a\_d\_gbeat4050}&\multicolumn{1}{c}{a\_d\_gbgas4050}&\multicolumn{1}{c}{a\_d\_gbhotel4050}&\multicolumn{1}{c}{a\_d\_gbeat4050}&\multicolumn{1}{c}{a\_d\_gbgas4050}\\
+\hline
+a\_d\_blackshr4050    &      0.0656\sym{***}&      0.0234\sym{***}&     0.00643\sym{*}  &       0.202\sym{***}&       0.158\sym{***}&     0.00908         \\
+                    &     (0.025)         &     (0.005)         &     (0.003)         &     (0.045)         &     (0.019)         &     (0.017)         \\
+\hline
+Observations        &        1909         &        3050         &        3056         &        1235         &        1659         &        1654         \\
+Adjusted \(R^{2}\)  &       0.003         &       0.010         &      -0.004         &       0.013         &       0.035         &      -0.009         \\
+widstat             &                     &                     &                     &                     &                     &                     \\
+\hline\hline
+\multicolumn{7}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{7}{l}{\footnotesize Standard errors in parentheses clustered by state.}\\
+\multicolumn{7}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{First Stage results for the change in the share of non-discriminatory hotels}
+\begin{tabular}{l*{6}{c}}
+\hline\hline
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}\\
+                    &\multicolumn{1}{c}{a\_d\_blackshr4050}&\multicolumn{1}{c}{a\_d\_blackshr4050}&\multicolumn{1}{c}{a\_d\_blackshr4050}&\multicolumn{1}{c}{a\_d\_blackshr4050}&\multicolumn{1}{c}{a\_d\_blackshr4050}&\multicolumn{1}{c}{a\_d\_blackshr4050}\\
+\hline
+a\_killed\_w          &     0.00993\sym{***}&     0.00868\sym{***}&     0.00893\sym{***}&                     &                     &                     \\
+                    &     (0.001)         &     (0.001)         &     (0.001)         &                     &                     &                     \\
+[1em]
+a\_bartikshock4050   &                     &                     &                     &       0.385\sym{***}&       0.318\sym{***}&       0.316\sym{***}\\
+                    &                     &                     &                     &     (0.068)         &     (0.055)         &     (0.055)         \\
+\hline
+Observations        &        1909         &        3050         &        3056         &        1235         &        1659         &        1654         \\
+Adjusted \(R^{2}\)  &       0.141         &       0.141         &       0.145         &       0.154         &       0.154         &       0.155         \\
+widstat             &                     &                     &                     &                     &                     &                     \\
+\hline\hline
+\multicolumn{7}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{7}{l}{\footnotesize Standard errors in parentheses clustered by state.}\\
+\multicolumn{7}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{Reduced Form results for the change in the share of non-discriminatory hotels}
+\begin{tabular}{l*{6}{c}}
+\hline\hline
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}\\
+                    &\multicolumn{1}{c}{a\_d\_gbhotel4050}&\multicolumn{1}{c}{a\_d\_gbeat4050}&\multicolumn{1}{c}{a\_d\_gbgas4050}&\multicolumn{1}{c}{a\_d\_gbhotel4050}&\multicolumn{1}{c}{a\_d\_gbeat4050}&\multicolumn{1}{c}{a\_d\_gbgas4050}\\
+\hline
+a\_killed\_w          &     0.00217\sym{**} &    0.000502\sym{**} &    0.000146         &                     &                     &                     \\
+                    &     (0.001)         &     (0.000)         &     (0.000)         &                     &                     &                     \\
+[1em]
+a\_bartikshock4050   &                     &                     &                     &       0.221\sym{**} &       0.317\sym{***}&      0.0175         \\
+                    &                     &                     &                     &     (0.109)         &     (0.042)         &     (0.038)         \\
+\hline
+Observations        &        1909         &        3050         &        3056         &        1235         &        1659         &        1654         \\
+Adjusted \(R^{2}\)  &       0.003         &       0.004         &      -0.005         &       0.000         &       0.026         &      -0.009         \\
+widstat             &                     &                     &                     &                     &                     &                     \\
+\hline\hline
+\multicolumn{7}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{7}{l}{\footnotesize Standard errors in parentheses clustered by state.}\\
+\multicolumn{7}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{IV results for the change in the share of non-discriminatory hotels}
+\begin{tabular}{l*{6}{c}}
+\hline\hline
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}\\
+                    &\multicolumn{1}{c}{a\_d\_gbhotel4050}&\multicolumn{1}{c}{a\_d\_gbeat4050}&\multicolumn{1}{c}{a\_d\_gbgas4050}&\multicolumn{1}{c}{a\_d\_gbhotel4050}&\multicolumn{1}{c}{a\_d\_gbeat4050}&\multicolumn{1}{c}{a\_d\_gbgas4050}\\
+\hline
+a\_d\_blackshr4050    &       0.219\sym{**} &      0.0579\sym{**} &      0.0163         &       0.573\sym{**} &       0.995\sym{***}&      0.0554         \\
+                    &     (0.085)         &     (0.024)         &     (0.016)         &     (0.285)         &     (0.195)         &     (0.120)         \\
+\hline
+Observations        &        1909         &        3050         &        3056         &        1235         &        1659         &        1654         \\
+Adjusted \(R^{2}\)  &      -0.017         &      -0.006         &      -0.007         &      -0.042         &      -1.172         &      -0.013         \\
+widstat             &       169.0         &       135.9         &       143.0         &       31.94         &       33.39         &       32.95         \\
+\hline\hline
+\multicolumn{7}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{7}{l}{\footnotesize Standard errors in parentheses clustered by state.}\\
+\multicolumn{7}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}

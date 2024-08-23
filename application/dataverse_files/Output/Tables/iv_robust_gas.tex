@@ -1,0 +1,52 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{OLS results for the change in the share of non-discriminatory gasoline stations}
+\begin{tabular}{l*{3}{c}}
+\hline\hline
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}\\
+                    &\multicolumn{1}{c}{a\_delta\_shrgas}&\multicolumn{1}{c}{a\_pct\_d\_shrgas}&\multicolumn{1}{c}{a\_d\_gbgas4050}\\
+\hline
+a\_delta\_shrblack    &     0.00320         &                     &                     \\
+                    &     (0.008)         &                     &                     \\
+[1em]
+a\_pct\_d\_shrblack    &                     &      -0.671         &                     \\
+                    &                     &     (0.798)         &                     \\
+[1em]
+a\_d\_blackshr4050    &                     &                     &     0.00641\sym{*}  \\
+                    &                     &                     &     (0.003)         \\
+\hline
+Observations        &        3056         &          42         &        3056         \\
+Adjusted \(R^{2}\)  &      -0.005         &       0.293         &      -0.004         \\
+widstat             &                     &                     &                     \\
+\hline\hline
+\multicolumn{4}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{4}{l}{\footnotesize Standard errors in parentheses.}\\
+\multicolumn{4}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{IV results for the change in the share of non-discriminatory gasoline stations}
+\begin{tabular}{l*{3}{c}}
+\hline\hline
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}\\
+                    &\multicolumn{1}{c}{a\_delta\_shrgas}&\multicolumn{1}{c}{a\_pct\_d\_shrgas}&\multicolumn{1}{c}{a\_d\_gbgas4050}\\
+\hline
+a\_delta\_shrblack    &       0.441         &                     &                     \\
+                    &     (0.628)         &                     &                     \\
+[1em]
+a\_pct\_d\_shrblack    &                     &       10.60         &                     \\
+                    &                     &    (14.639)         &                     \\
+[1em]
+a\_d\_blackshr4050    &                     &                     &      0.0163         \\
+                    &                     &                     &     (0.015)         \\
+\hline
+Observations        &        3056         &          42         &        3056         \\
+Adjusted \(R^{2}\)  &      -1.017         &     -16.148         &      -0.019         \\
+widstat             &       0.961         &       0.368         &       144.3         \\
+\hline\hline
+\multicolumn{4}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{4}{l}{\footnotesize Standard errors in parentheses.}\\
+\multicolumn{4}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}

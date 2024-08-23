@@ -1,0 +1,20 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{Effects of White Casualties on Number of Establishments}
+\begin{tabular}{l*{6}{c}}
+\hline\hline
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}\\
+                    &\multicolumn{1}{c}{barber}&\multicolumn{1}{c}{eating}&\multicolumn{1}{c}{gas}&\multicolumn{1}{c}{hotel}&\multicolumn{1}{c}{informal}&\multicolumn{1}{c}{other}\\
+\hline
+Treatment           &      0.0550\sym{***}&      0.0740\sym{***}&      0.0263\sym{***}&      0.0192\sym{***}&     0.00488         &      0.0602\sym{***}\\
+                    &     (0.008)         &     (0.010)         &     (0.005)         &     (0.005)         &     (0.005)         &     (0.009)         \\
+\hline
+Observations        &       37248         &       37248         &       37248         &       37248         &       37248         &       37248         \\
+Adjusted \(R^{2}\)  &       0.818         &       0.844         &       0.766         &       0.865         &       0.878         &       0.788         \\
+N\_clust             &        3104         &        3104         &        3104         &        3104         &        3104         &        3104         \\
+\hline\hline
+\multicolumn{7}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{7}{l}{\footnotesize Standard errors clustered by county in parentheses.         Casualties are measured in units of 100.          All columns include county and year fixed effects.}\\
+\multicolumn{7}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}

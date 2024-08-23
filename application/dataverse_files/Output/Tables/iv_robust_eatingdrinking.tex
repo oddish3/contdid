@@ -1,0 +1,52 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{OLS results for the change in the share of non-discriminatory eating and drinking establishments}
+\begin{tabular}{l*{3}{c}}
+\hline\hline
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}\\
+                    &\multicolumn{1}{c}{a\_delta\_shreat}&\multicolumn{1}{c}{a\_pct\_d\_shreat}&\multicolumn{1}{c}{a\_d\_gbeat4050}\\
+\hline
+a\_delta\_shrblack    &      0.0166\sym{**} &                     &                     \\
+                    &     (0.008)         &                     &                     \\
+[1em]
+a\_pct\_d\_shrblack    &                     &       0.535         &                     \\
+                    &                     &     (0.350)         &                     \\
+[1em]
+a\_d\_blackshr4050    &                     &                     &      0.0230\sym{***}\\
+                    &                     &                     &     (0.005)         \\
+\hline
+Observations        &        3050         &         125         &        3050         \\
+Adjusted \(R^{2}\)  &       0.002         &      -0.050         &       0.010         \\
+widstat             &                     &                     &                     \\
+\hline\hline
+\multicolumn{4}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{4}{l}{\footnotesize Standard errors in parentheses.}\\
+\multicolumn{4}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{IV results for the change in the share of non-discriminatory eating and drinking establishments}
+\begin{tabular}{l*{3}{c}}
+\hline\hline
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}\\
+                    &\multicolumn{1}{c}{a\_delta\_shreat}&\multicolumn{1}{c}{a\_pct\_d\_shreat}&\multicolumn{1}{c}{a\_d\_gbeat4050}\\
+\hline
+a\_delta\_shrblack    &       1.273         &                     &                     \\
+                    &     (1.302)         &                     &                     \\
+[1em]
+a\_pct\_d\_shrblack    &                     &       4.574\sym{*}  &                     \\
+                    &                     &     (2.418)         &                     \\
+[1em]
+a\_d\_blackshr4050    &                     &                     &      0.0578\sym{**} \\
+                    &                     &                     &     (0.024)         \\
+\hline
+Observations        &        3050         &         125         &        3050         \\
+Adjusted \(R^{2}\)  &      -8.199         &      -2.193         &      -0.026         \\
+widstat             &       1.030         &       3.661         &       135.7         \\
+\hline\hline
+\multicolumn{4}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{4}{l}{\footnotesize Standard errors in parentheses.}\\
+\multicolumn{4}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}
