@@ -1,179 +1,335 @@
 rm(list=ls())
+
+# Load necessary libraries
 library(fixest)
+library(dplyr)
 library(broom)
-library(tidyverse)
-library(haven)
-library(binsreg)
+library(sandwich)
+library(kableExtra)
+library(knitr)
+library(ggplot2)
+library(gridExtra)
+library(tidyr)
 library(contdid)
-longdiff_col <- read_dta("application/113746-V1/longdiff/co/longdiff_col.dta")
 
-run_regression <- function(data, mal_measure, controls = NULL) {
-  dep_vars <- c("dlit", "dsch", "dscore")
-  results <- list()
+# Load the dataset
+data <- haven::read_dta("application/113746-V1/longdiff/co/longdiff_col.dta")
 
-  for (dv in dep_vars) {
-    formula <- as.formula(paste(dv, "~", mal_measure, "+ bplregcol", ifelse(!is.null(controls), paste("+", paste(controls, collapse = "+")), "")))
-    model <- feols(formula, data = data, weights = ~ sqrt(wtbpl), vcov = "hetero")
-    results[[dv]] <- tidy(model) %>%
-      filter(term == mal_measure) %>%
-      select(estimate, std.error)
-  }
+# Convert bplregcol to a factor variable and create dummy variables
+data$bplregcol <- as.factor(data$bplregcol)
+data <- fastDummies::dummy_cols(data, select_columns = "bplregcol", remove_selected_columns = TRUE)
 
-  bind_rows(results, .id = "dep_var")
+# Define control variable sets
+holdridge <- c("ecozone_stdry", "ecozone_stwet", "ecozone_trdry", "ecozone_trwet", "ecozone_warm")
+conflict <- c("vioearly", "violate")
+endowment <- c("cafetera", "carbon", "ganadera_neuva", "mktaccess", "manuf", "nivel_de_vida", "lndens")
+diseases <- c("helminth_nh", "hookworm", "leishmaniasis", "yelfev")
+allthree <- c("helminth_nh", "hookworm", "leishmaniasis", "yelfev", "land_inadeq",
+              grep("^vio", names(data), value=TRUE),
+              "cafetera", "carbon", "ganadera_neuva", "mktaccess", "manuf", "nivel_de_vida")
+
+# Function to run regression and extract results
+run_reg_set <- function(depvar, malaria_var, controls, data) {
+  formula <- as.formula(paste(depvar, "~", malaria_var, "+",
+                              paste(c(grep("^bplregcol_", names(data), value=TRUE), controls), collapse = "+")))
+
+  model <- feols(formula, data = data, weights = ~wtbpl, vcov = "HC1")
+
+  coef <- coef(model)[malaria_var]
+  se <- sqrt(vcov(model)[malaria_var, malaria_var])
+  p_value <- summary(model)[["coeftable"]][2,4]
+  stars <- ifelse(p_value < 0.01, "***", ifelse(p_value < 0.05, "**", ifelse(p_value < 0.1, "*", "")))
+
+  return(list(coef = coef, se = se, stars = stars, r2 = r2(model)))
 }
 
-# Run regressions and create table
-table_data <- bind_rows(
-  run_regression(longdiff_col, "poveda") %>% mutate(row = "None (basic specification)", measure = "Poveda"),
-  run_regression(longdiff_col, "poveda", c("vioearly", "violate")) %>% mutate(row = "Conflict", measure = "Poveda"),
-  run_regression(longdiff_col, "poveda", c("cafetera", "carbon", "ganadera_neuva", "mktaccess", "manuf", "nivel_de_vida", "lndens")) %>% mutate(row = "Economic activity", measure = "Poveda"),
-  run_regression(longdiff_col, "poveda", c("helminth_nh", "hookworm", "leishmaniasis", "yelfev")) %>% mutate(row = "Other diseases", measure = "Poveda"),
-  run_regression(longdiff_col, "mell") %>% mutate(row = "None (basic specification)", measure = "Mellinger"),
-  run_regression(longdiff_col, "mell", c("vioearly", "violate")) %>% mutate(row = "Conflict", measure = "Mellinger"),
-  run_regression(longdiff_col, "mell", c("cafetera", "carbon", "ganadera_neuva", "mktaccess", "manuf", "nivel_de_vida", "lndens")) %>% mutate(row = "Economic activity", measure = "Mellinger"),
-  run_regression(longdiff_col, "mell", c("helminth_nh", "hookworm", "leishmaniasis", "yelfev")) %>% mutate(row = "Other diseases", measure = "Mellinger")
+# Define dependent variables and control sets
+dep_vars <- c("dlit", "dsch", "dscore")
+control_sets <- list(
+  "None (basic specification)" = character(0),
+  "Conflict" = conflict,
+  "Economic activity" = endowment,
+  "Other diseases" = diseases,
+  "Full controls" = allthree
 )
 
-# Format table
-formatted_table <- table_data %>%
-  pivot_wider(
-    id_cols = c(row, measure),
-    names_from = dep_var,
-    values_from = c(estimate, std.error),
-    names_glue = "{dep_var}_{.value}"
-  ) %>%
-  select(row, measure,
-         dlit_estimate, dlit_std.error,
-         dsch_estimate, dsch_std.error,
-         dscore_estimate, dscore_std.error)
+# Run regressions for Poveda and Mellinger measures
+results_poveda <- lapply(dep_vars, function(dv) {
+  sapply(control_sets, function(cs) run_reg_set(dv, "poveda", cs, data))
+})
 
-# Print formatted table
-print(formatted_table, n = Inf)
+results_mell <- lapply(dep_vars, function(dv) {
+  sapply(control_sets, function(cs) run_reg_set(dv, "mell", cs, data))
+})
+
+format_results <- function(results_list, malaria_var) {
+  formatted <- lapply(seq_along(results_list), function(i) {
+    dv <- dep_vars[i]
+    res <- results_list[[i]]
+    data.frame(
+      "Dependent.Variable" = rep(dv, ncol(res)),
+      "Controls" = colnames(res),
+      "Coefficient" = sprintf("%.3f%s", res["coef",], res["stars",]),
+      "SE" = sprintf("(%.3f)", res["se",])
+    )
+  })
+  do.call(rbind, formatted)
+}
+
+# Use the function
+table_poveda <- format_results(results_poveda, "poveda")
+table_mell <- format_results(results_mell, "mell")
+
+# Merge the datasets
+merged_table <- full_join(table_poveda, table_mell,
+                          by = c("Dependent.Variable", "Controls"),
+                          suffix = c("_Poveda", "_Mellinger"))
+
+# Merge the datasets
+merged_table <- full_join(table_poveda, table_mell,
+                          by = c("Dependent.Variable", "Controls"),
+                          suffix = c("_Poveda", "_Mellinger"))
+
+# Reshape the data
+reshaped_data <- merged_table %>%
+  pivot_wider(
+    id_cols = Controls,
+    names_from = Dependent.Variable,
+    values_from = c(Coefficient_Poveda, SE_Poveda, Coefficient_Mellinger, SE_Mellinger),
+    names_sep = "_"
+  ) %>%
+  select(
+    Controls,
+    Literacy_Poveda = Coefficient_Poveda_dlit,
+    Literacy_SE_Poveda = SE_Poveda_dlit,
+    Schooling_Poveda = Coefficient_Poveda_dsch,
+    Schooling_SE_Poveda = SE_Poveda_dsch,
+    Income_Poveda = Coefficient_Poveda_dscore,
+    Income_SE_Poveda = SE_Poveda_dscore,
+    Literacy_Mellinger = Coefficient_Mellinger_dlit,
+    Literacy_SE_Mellinger = SE_Mellinger_dlit,
+    Schooling_Mellinger = Coefficient_Mellinger_dsch,
+    Schooling_SE_Mellinger = SE_Mellinger_dsch,
+    Income_Mellinger = Coefficient_Mellinger_dscore,
+    Income_SE_Mellinger = SE_Mellinger_dscore
+  )
+
+# Combine coefficient and SE columns
+combine_coef_se <- function(coef, se) {
+  paste0(coef, "\n", se)
+}
+
+reshaped_data_combined <- reshaped_data %>%
+  mutate(
+    Literacy_Poveda = combine_coef_se(Literacy_Poveda, Literacy_SE_Poveda),
+    Schooling_Poveda = combine_coef_se(Schooling_Poveda, Schooling_SE_Poveda),
+    Income_Poveda = combine_coef_se(Income_Poveda, Income_SE_Poveda),
+    Literacy_Mellinger = combine_coef_se(Literacy_Mellinger, Literacy_SE_Mellinger),
+    Schooling_Mellinger = combine_coef_se(Schooling_Mellinger, Schooling_SE_Mellinger),
+    Income_Mellinger = combine_coef_se(Income_Mellinger, Income_SE_Mellinger)
+  ) %>%
+  select(Controls,
+         Literacy_Poveda, Schooling_Poveda, Income_Poveda,
+         Literacy_Mellinger, Schooling_Mellinger, Income_Mellinger)
+
+# Create LaTeX table
+latex_table <- reshaped_data_combined %>%
+  kbl(format = "latex",
+      booktabs = TRUE,
+      caption = "Malaria ecology studies comparison",
+      col.names = c("Controls",
+                    "Literacy", "Years of schooling", "Income index",
+                    "Literacy", "Years of schooling", "Income index"),
+      align = c("l", rep("c", 6))) %>%
+  kable_styling(latex_options = c("scale_down", "hold_position")) %>%
+  add_header_above(c(" " = 1,
+                     "Malaria ecology (Poveda)" = 3,
+                     "Malaria ecology (Mellinger)" = 3))
+
+# Print the LaTeX table
+# cat(latex_table)
 
 # Basic specification for literacy, using Poveda measure
-basic_lit_model <- feols(dsch ~ poveda + bplregcol,
-                         data = longdiff_col,
-                         weights = ~ sqrt(wtbpl),
-                         vcov = "hetero")
 
-# Print the summary of the model
-summary(basic_lit_model)
+# Fit the model directly with additional components using grep
+model <- feols(dscore~mell,
+               data = data, weights = ~wtbpl, vcov = "HC1")
+# Print out the model summary
+summary(model)
 
-data <- longdiff_col
-
+# summary(data$poveda)
+# summary(data$mell)
+data$poveda <- ifelse(data$poveda > 1, 1, data$poveda)
+data$mell <- ifelse(data$mell > 1, 1, data$mell)
 data <- data %>% filter(!is.na(poveda & dsch) & poveda < 1)
 
-# Define the cont_twfe_weights function
-cont_twfe_weights <- function(l, D) {
-  wt <- ( ( mean(D[D>=l]) - mean(D) ) * mean(1*(D>=l)) ) / var(D)
-  wt
+perform_analysis <- function(dose_var, dep_var, final_data) {
+  cont_twfe_weights <- function(l, D) {
+    wt <- ( ( mean(D[D >= l]) - mean(D) ) * mean(1 * (D >= l)) ) / var(D)
+    wt
+  }
+
+  dose <- final_data[[dose_var]]
+  dy <- final_data[[dep_var]]
+
+  dL <- min(dose[dose > 0])
+  dU <- max(dose)
+
+  # Create dose grid
+  dose_grid <- seq(dL, dU, length.out = 100)
+
+  # Density plot of the dose
+  dose_density_plot <- ggplot(data.frame(dose = dose[dose > 0]), aes(x = dose)) +
+    geom_density(colour = "darkblue", linewidth = 1.2, fill = "lightblue", alpha = 0.4) +
+    geom_vline(xintercept = mean(dose), colour = "red", linewidth = 1, linetype = "dashed") +
+    xlim(c(min(dose_grid), max(dose_grid))) +
+    ylab("Density") +
+    xlab("Dose (Malaria Index)") +
+    ylim(c(0, 3)) +
+    labs(title = paste("Density of ", dose_var), subtitle = "Red line indicates mean dose level") +
+    theme_minimal()
+
+  # Calculate TWFE weights
+  twfe_weights <- sapply(dose_grid, cont_twfe_weights, D = dose)
+  mean_weight <- mean(twfe_weights)
+
+  # Create dataframe for plotting
+  plot_df <- data.frame(dose_grid = dose_grid, twfe_weights = twfe_weights)
+
+  # TWFE weights plot
+  twfe_weights_plot <- ggplot(data = plot_df, aes(x = dose_grid, y = twfe_weights)) +
+    geom_line(colour = "darkblue", linewidth = 1.2) +
+    xlim(c(min(dose_grid), max(dose_grid))) +
+    ylab("TWFE Weights") +
+    xlab("Dose (Malaria Index)") +
+    geom_vline(xintercept = mean(twfe_weights), colour = "red", linewidth = 1, linetype = "dashed") +
+    ylim(c(0, max(twfe_weights) + 0.5)) +
+    labs(title = paste("TWFE Weights for ", dose_var), subtitle = "Red line indicates mean weight level") +
+    theme_minimal()
+
+  # Combine plots (can be commented out if not needed)
+  green_twfe <- grid.arrange(dose_density_plot, twfe_weights_plot, ncol = 2)
+
+  # Perform npiv_regression
+  res <- npiv_regression(treatment_col = dose_var, outcome_col = dep_var, data = final_data)
+
+  # Prepare data for ATT and ACR plots
+  att_df <- data.frame(
+    dose = res[["Xx"]],
+    att = res[["hhat"]],
+    upper = res[["ATT_upper_UCB"]],
+    lower = res[["ATT_lower_UCB"]],
+    se = res[["sigh"]]
+  )
+
+  acr_df <- data.frame(
+    dose = res[["Xx"]],
+    acr = res[["dhat"]],
+    upper = res[["ACR_upper_UCB"]],
+    lower = res[["ACR_lower_UCB"]],
+    se = res[["sigd"]]
+  )
+
+  att_df$ci_lower <- att_df$att - 1.96 * att_df$se
+  att_df$ci_upper <- att_df$att + 1.96 * att_df$se
+  acr_df$ci_lower <- acr_df$acr - 1.96 * acr_df$se
+  acr_df$ci_upper <- acr_df$acr + 1.96 * acr_df$se
+
+  # Function to create a clean, minimalist plot
+  create_clean_plot <- function(data, y_var, y_label) {
+    ggplot(data, aes(x = dose)) +
+      geom_ribbon(aes(ymin = lower, ymax = upper), fill = "#66C2A4", alpha = 0.2) +
+      geom_ribbon(aes(ymin = !!sym(y_var) - 1.96 * se, ymax = !!sym(y_var) + 1.96 * se),
+                  fill = "#2B8C6B", alpha = 0.3) +
+      geom_line(aes(y = !!sym(y_var)), color = "#007358", linewidth = 1) +
+      geom_hline(yintercept = 0, linetype = "dotted", color = "gray30", linewidth = 0.5) +
+      scale_x_continuous(expand = c(0.01, 0), limits = c(0, 1)) +
+      scale_y_continuous(expand = c(0.01, 0)) +
+      labs(x = "Dose (Malaria Index)", y = y_label) +
+      theme_minimal() +
+      theme(
+        plot.background = element_rect(fill = "white", color = NA),
+        panel.background = element_rect(fill = "white", color = NA),
+        panel.grid = element_blank(),
+        axis.line = element_line(color = "black", linewidth = 0.5),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 10, color = "black"),
+        plot.margin = margin(t = 20, r = 20, b = 20, l = 20, unit = "pt"),
+        legend.position = "none"
+      )
+  }
+
+  # Create ATT and ACR plots
+  att_plot <- create_clean_plot(att_df, "att", "Average Treatment Effect on\nChange in Dependent Variable")
+  acr_plot <- create_clean_plot(acr_df, "acr", "Average Causal Response on\nChange in Dependent Variable")
+
+  # Find significant dose levels
+  significant_ci <- att_df %>%
+    dplyr::filter(ci_lower > 0 | ci_upper < 0)
+
+  significant_ucb <- att_df %>%
+    dplyr::filter(lower > 0 | upper < 0)
+
+  significant_ci_dose_levels <- significant_ci$dose
+  significant_ucb_dose_levels <- significant_ucb$dose
+
+  significant_ci_ranges <- find_ranges(significant_ci_dose_levels)
+  significant_ucb_ranges <- find_ranges(significant_ucb_dose_levels)
+
+  # Repeat for ACR
+  significant_ci_acr <- acr_df %>%
+    dplyr::filter(ci_lower > 0 | ci_upper < 0)
+
+  significant_ucb_acr <- acr_df %>%
+    dplyr::filter(lower > 0 | upper < 0)
+
+  significant_ci_dose_levels_acr <- significant_ci_acr$dose
+  significant_ucb_dose_levels_acr <- significant_ucb_acr$dose
+
+  significant_ci_ranges_acr <- find_ranges(significant_ci_dose_levels_acr)
+  significant_ucb_ranges_acr <- find_ranges(significant_ucb_dose_levels_acr)
+
+  # Return the results as a list for inspection
+  list(
+    dose_twfe_plot = green_twfe,
+    att_plot = att_plot,
+    acr_plot = acr_plot,
+    significant_ci_ranges = significant_ci_ranges,
+    significant_ucb_ranges = significant_ucb_ranges,
+    significant_ci_ranges_acr = significant_ci_ranges_acr,
+    significant_ucb_ranges_acr = significant_ucb_ranges_acr,
+    res = res["summary"]
+  )
 }
 
-# Prepare the data
-dose <- data$poveda
-dy <- data$dsch  # Using literacy as the outcome
+find_ranges <- function(dose_levels, gap = 0.01) {
+  dose_levels <- sort(dose_levels)
+  split_points <- c(0, which(diff(dose_levels) > gap), length(dose_levels))
 
-dL <- min(dose[dose>0])
-dU <- max(dose)
+  ranges <- lapply(seq_along(split_points[-1]), function(i) {
+    range_start <- split_points[i] + 1
+    range_end <- split_points[i + 1]
+    range(dose_levels[range_start:range_end])
+  })
 
-# Create dose grid
-dose_grid <- seq(dL, dU, length.out=100)
+  ranges
+}
 
-# Density plot of the dose
-dose_density_plot <- ggplot(data.frame(dose=dose[dose>0]), aes(x=dose)) +
-  geom_density(colour = "darkblue", linewidth = 1.2) +
-  xlim(c(min(dose_grid), max(dose_grid))) +
-  ylab("Density") +
-  xlab("Dose (Poveda)") +
-  ylim(c(0,3)) +
-  labs(title="Density of Malaria Ecology (Poveda)")
+# Example usage:
+dep_vars <- c("dlit", "dsch", "dscore")
+dose_vars <- c("poveda", "mell")
 
-print(dose_density_plot)
+results <- list()
+for (dep_var in dep_vars) {
+  for (dose_var in dose_vars) {
+    result_key <- paste0(dose_var, "_", dep_var)
+    results[[result_key]] <- perform_analysis(dose_var, dep_var, data)
+  }
+}
 
-# Calculate TWFE weights
-twfe_weights <- sapply(dose_grid, cont_twfe_weights, D=dose)
 
-# Create dataframe for plotting
-plot_df <- data.frame(dose_grid = dose_grid, twfe_weights = twfe_weights)
-
-# TWFE weights plot
-twfe_weights_plot <- ggplot(data=plot_df, aes(x = dose_grid, y = twfe_weights)) +
-  geom_line(colour = "darkblue", linewidth = 1.2) +
-  xlim(c(min(dose_grid), max(dose_grid))) +
-  ylab("TWFE weights") +
-  xlab("Dose (Poveda)") +
-  geom_vline(xintercept = mean(dose), colour="black", linewidth = 0.5, linetype = "dotted") +
-  ylim(c(0,3)) +
-  labs(title="TWFE weights for Malaria Ecology (Poveda)")
-
-print(twfe_weights_plot)
-
-library(gridExtra)
-
-grid.arrange(dose_density_plot, twfe_weights_plot, ncol=2)
-
-res <- npiv_regression(treatment_col = "poveda", outcome_col = "dsch", data = data)
-
-att_df <- data.frame(
-  dose = res[["Xx"]],
-  att = res[["hhat"]],
-  upper = res[["ATT_upper_UCB"]],
-  lower = res[["ATT_lower_UCB"]],
-  se = res[["sigh"]]
-)
-# Calculate 95% CI
-att_df$ci_lower <- att_df$att - 1.96 * att_df$se
-att_df$ci_upper <- att_df$att + 1.96 * att_df$se
-att_plot <- ggplot(att_df, aes(x = dose)) +
-  # UCB (wider, lighter ribbon)
-  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "lightblue", alpha = 0.2) +
-  # 95% CI (narrower, darker ribbon)
-  geom_ribbon(aes(ymin = ci_lower, ymax = ci_upper), fill = "blue", alpha = 0.2) +
-  # ATT line
-  geom_line(aes(y = att), color = "blue", size = 1) +
-  # Zero reference line
-  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
-  labs(title = "Nonparametric Estimates of ATT(d|d)",
-       subtitle = "With 95% CI (dark blue) and Uniform Confidence Bands (light blue)",
-       x = "Malaria Ecology (Poveda)",
-       y = "Average Treatment Effect on the Treated") +
-  scale_x_continuous(labels = scales::number_format(accuracy = 0.01),
-                     breaks = scales::pretty_breaks(n = 10)) +
-  scale_y_continuous(labels = scales::number_format(accuracy = 0.01),
-                     breaks = scales::pretty_breaks(n = 10)) +
-  theme_minimal(base_size = 12) +
-  theme(
-    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
-    plot.subtitle = element_text(hjust = 0.5, size = 12),
-    axis.title = element_text(face = "bold", size = 14),
-    axis.text = element_text(size = 12),
-    panel.grid.minor = element_blank(),
-    panel.grid.major = element_line(color = "gray90"),
-    plot.margin = margin(t = 20, r = 20, b = 20, l = 20, unit = "pt"),
-    legend.position = "none"
-  )
-
-acr_df <- data.frame(
-  dose = res[["Xx"]],
-  acr = res[["dhat"]],
-  upper = res[["ACR_upper_UCB"]],
-  lower = res[["ACR_lower_UCB"]],
-  se = res[["sigd"]]
-)
-
-acr_plot <- ggplot(acr_df, aes(x = dose)) +
-  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "lightgreen", alpha = 0.3) +
-  geom_line(aes(y = acr), color = "darkgreen", size = 1) +
-  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
-  labs(title = "Derivative of ATT(d|d): Average Causal Response",
-       x = "Malaria Ecology (Poveda)",
-       y = "Average Causal Response") +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(hjust = 0.5, face = "bold"),
-    axis.title = element_text(face = "bold"),
-    panel.grid.minor = element_blank()
-  )
-
-print(att_plot)
-print(acr_plot)
+# print(att_plot)
+# ggsave(att_plot, file = "/home/oddish3/Documents/uni/master-dissertation/diss/figures/malatt.png")
+# res[["binarised"]]
+# ggsave(acr_plot, file = "/home/oddish3/Documents/uni/master-dissertation/diss/figures/malacr.png")
+# print(acr_plot)

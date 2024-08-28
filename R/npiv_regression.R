@@ -175,7 +175,7 @@ npiv_regression <- function(data,
   data_full$binary <- as.integer(data_full[[treatment_col]] > 0)
   binarised <- tryCatch({
     # Fit the model using fixest
-    model <- fixest::feols(as.formula(paste(outcome_col, "~ binary")), data = data_full)
+    model <- fixest::feols(as.formula(paste(outcome_col, "~ binary")), data = data_full, vcov = "HC1")
 
     # Check if the "binary" coefficient is present
     if (!"binary" %in% names(coef(model))) {
@@ -362,6 +362,43 @@ npiv_regression <- function(data,
     stop(e)
   })
 
+  # browser()
+  create_summary <- function(binarised, ACR_estimate, se_ACR, p_value_ACR) {
+    # Extracting the coefficient, standard error, and p-value for ATT^o
+    att_coef <- binarised[["estimate"]]
+    att_se <- binarised[["std_error"]]
+    att_p <- binarised[["model"]][["coeftable"]][2, 4]
+
+    # Determine significance stars
+    att_sig <- ifelse(att_p < 0.001, "***",
+                      ifelse(att_p < 0.01, "**",
+                             ifelse(att_p < 0.05, "*",
+                                    ifelse(att_p < 0.1, ".", ""))))
+
+    # Create ATT^o summary string
+    att_summary <- sprintf("ATT^o estimate : %.3f(%.3f)%s", att_coef, att_se, att_sig)
+
+    # Extracting the coefficient, standard error, and p-value for ACR^o
+    acr_coef <- ACR_estimate
+    acr_se <- se_ACR
+    acr_p <- p_value_ACR
+
+    # Determine significance stars
+    acr_sig <- ifelse(acr_p < 0.001, "***",
+                      ifelse(acr_p < 0.01, "**",
+                             ifelse(acr_p < 0.05, "*",
+                                    ifelse(acr_p < 0.1, ".", ""))))
+
+    # Create ACR^o summary string
+    acr_summary <- sprintf("ACR^o estimate : %.3f(%.3f)%s", acr_coef, acr_se, acr_sig)
+
+    # Return the summaries
+    list(ATT_summary = att_summary, ACR_summary = acr_summary)
+  }
+
+  # Calculate summaries using the create_summary function
+  summaries <- create_summary(binarised, ACR_estimate, se_ACR, p_value_ACR)
+
   # Return results
   # browser()
   list(
@@ -388,6 +425,7 @@ npiv_regression <- function(data,
     ACR_upper_UCB = ACR_upper_UCB,
     ACR_lower_UCB = ACR_lower_UCB,
     ci_lower_ACR = ci_lower_ACR,
-    ci_upper_ACR = ci_upper_ACR
+    ci_upper_ACR = ci_upper_ACR,
+    summary = summaries
   )
 }

@@ -9,8 +9,17 @@ library(tidyverse)
 library(knitr)
 library(modelsummary)
 library(kableExtra)
+library(gridExtra)
+library(contdid)
 
 data <- read_dta("application/dataverse_files/Data Files/county_gb_main.dta")
+# sort(unique(data$year))
+
+# exploratory data analysis
+dd <- data %>% filter(year >=1947& a_killed_w <1) %>% select(a_killed_w, year, county_code)
+# plot(dd$a_killed_w)
+sort(unique(dd$a_killed_w_after))
+
 
 # Define county controls
 county_controls <- c(
@@ -109,9 +118,9 @@ regression_table <- modelsummary(model_list,
   )
 
 # Print LaTeX code
-cat(regression_table)
+# cat(regression_table)
 
-
+######
 
 
 # models <- list(
@@ -126,119 +135,142 @@ cat(regression_table)
 
 # ES
 # Run the regression
-model <- feols(a_gb_tot ~ taumin3_a_killed_w + taumin2_a_killed_w +
-                 taupos1_a_killed_w + taupos2_a_killed_w + taupos3_a_killed_w +
-                 taupos4_a_killed_w + taupos5_a_killed_w + taupos6_a_killed_w +
-                 taupos7_a_killed_w + taupos8_a_killed_w + taupos9_a_killed_w |
-                 county_code + year,
-               data = data,
-               cluster = "county_code")
-
-# Extract coefficients and confidence intervals
-results <- tidy(model, conf.int = TRUE) %>%
-  filter(grepl("tau", term))
-
-# Add year information
-results <- results %>%
-  mutate(year = case_when(
-    term == "taumin3_a_killed_w" ~ 1939,
-    term == "taumin2_a_killed_w" ~ 1940,
-    term == "taupos1_a_killed_w" ~ 1947,
-    term == "taupos2_a_killed_w" ~ 1948,
-    term == "taupos3_a_killed_w" ~ 1949,
-    term == "taupos4_a_killed_w" ~ 1950,
-    term == "taupos5_a_killed_w" ~ 1951,
-    term == "taupos6_a_killed_w" ~ 1952,
-    term == "taupos7_a_killed_w" ~ 1953,
-    term == "taupos8_a_killed_w" ~ 1954,
-    term == "taupos9_a_killed_w" ~ 1955
-  ))
-
-# Add the reference year (1941)
-results <- rbind(results, data.frame(
-  term = "reference",
-  estimate = 0,
-  std.error = 0,
-  statistic = 0,
-  p.value = 1,
-  conf.low = 0,
-  conf.high = 0,
-  year = 1941
-))
-
-# Create the plot
-p <- ggplot(results, aes(x = year, y = estimate)) +
-  geom_point(color = "black", shape = 15, size = 3) +
-  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.2) +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  geom_vline(xintercept = 1941, linetype = "solid") +
-  geom_rect(aes(xmin = 1942, xmax = 1946, ymin = -Inf, ymax = Inf),
-            fill = "grey90", alpha = 0.5) +
-  theme_minimal() +
-  labs(x = "Year", y = "Estimate") +
-  theme(legend.position = "none")
-print(p)
+# model <- feols(a_gb_tot ~ taumin3_a_killed_w + taumin2_a_killed_w +
+#                  taupos1_a_killed_w + taupos2_a_killed_w + taupos3_a_killed_w +
+#                  taupos4_a_killed_w + taupos5_a_killed_w + taupos6_a_killed_w +
+#                  taupos7_a_killed_w + taupos8_a_killed_w + taupos9_a_killed_w |
+#                  county_code + year,
+#                data = data,
+#                cluster = "county_code")
+#
+# # Extract coefficients and confidence intervals
+# results <- tidy(model, conf.int = TRUE) %>%
+#   filter(grepl("tau", term))
+#
+# # Add year information
+# results <- results %>%
+#   mutate(year = case_when(
+#     term == "taumin3_a_killed_w" ~ 1939,
+#     term == "taumin2_a_killed_w" ~ 1940,
+#     term == "taupos1_a_killed_w" ~ 1947,
+#     term == "taupos2_a_killed_w" ~ 1948,
+#     term == "taupos3_a_killed_w" ~ 1949,
+#     term == "taupos4_a_killed_w" ~ 1950,
+#     term == "taupos5_a_killed_w" ~ 1951,
+#     term == "taupos6_a_killed_w" ~ 1952,
+#     term == "taupos7_a_killed_w" ~ 1953,
+#     term == "taupos8_a_killed_w" ~ 1954,
+#     term == "taupos9_a_killed_w" ~ 1955
+#   ))
+#
+# # Add the reference year (1941)
+# results <- rbind(results, data.frame(
+#   term = "reference",
+#   estimate = 0,
+#   std.error = 0,
+#   statistic = 0,
+#   p.value = 1,
+#   conf.low = 0,
+#   conf.high = 0,
+#   year = 1941
+# ))
+#
+# # Create the plot
+# p <- ggplot(results, aes(x = year, y = estimate)) +
+#   geom_point(color = "black", shape = 15, size = 3) +
+#   geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.2) +
+#   geom_hline(yintercept = 0, linetype = "dashed") +
+#   geom_vline(xintercept = 1941, linetype = "solid") +
+#   geom_rect(aes(xmin = 1942, xmax = 1946, ymin = -Inf, ymax = Inf),
+#             fill = "grey90", alpha = 0.5) +
+#   theme_minimal() +
+#   labs(x = "Year", y = "Estimate") +
+#   theme(legend.position = "none")
+# print(p)
 
 # ------------------------------------------------------------
 # my did cont
-data <- data %>% filter(!is.na(a_gb_tot) & !is.na(a_killed_w))
-calc_period_avg <- function(df, var) {
-  df %>%
-    group_by(stateid, period = case_when(
-      year <= 1941 ~ "pre",
-      year >= 1947 ~ "post",
-      TRUE ~ "interim"
-    )) %>%
-    summarise(avg = mean({{var}}, na.rm = TRUE)) %>%
-    ungroup()
+
+# Step 1: Calculate average for variables with and without 'a_' prefix by period
+average_totals <- data %>%
+  mutate(period = case_when(
+    year < 1942 ~ "before_1942",
+    year > 1945 ~ "after_1945",
+    TRUE ~ NA_character_
+  )) %>%
+  filter(!is.na(period)) %>%
+  group_by(county_code, period) %>%
+  summarise(
+    avg_a_gb_tot = mean(a_gb_tot, na.rm = TRUE),
+    avg_gb_tot = mean(gb_tot, na.rm = TRUE)
+  ) %>%
+  ungroup()
+
+# Step 2: Calculate the change in averages between pre-1942 and post-1945 for each county_code
+change_in_a_gb_tot <- average_totals %>%
+  select(county_code, period, avg_a_gb_tot) %>%
+  spread(key = period, value = avg_a_gb_tot) %>%
+  mutate(change_a_gb_tot = after_1945 - before_1942) %>%
+  select(county_code, change_a_gb_tot)
+
+# Spread avg_gb_tot next
+change_in_gb_tot <- average_totals %>%
+  select(county_code, period, avg_gb_tot) %>%
+  spread(key = period, value = avg_gb_tot) %>%
+  mutate(change_gb_tot = after_1945 - before_1942) %>%
+  select(county_code, change_gb_tot)
+
+# Merge the two change datasets together
+change_in_totals <- change_in_a_gb_tot %>%
+  inner_join(change_in_gb_tot, by = "county_code")
+
+# Step 3: Extract one unique value for variables with and without 'a_' prefix per county_code
+killed_unique <- data %>%
+  group_by(county_code) %>%
+  summarise(
+    a_killed_w = first(a_killed_w),
+    killed_w = first(killed_w)
+  ) %>%
+  ungroup()
+
+# Step 4: Merge the changes in gb_tot with killed_w for both variables with and without 'a_' prefix
+final_data <- change_in_totals %>%
+  inner_join(killed_unique, by = "county_code")
+
+# Step 5: Run the regression of the change in gb_tot on a_killed_w
+regression_result <- lm(change_a_gb_tot ~ a_killed_w, data = final_data)
+summary(regression_result)
+
+final_data$binary <- ifelse(final_data$a_killed_w > 0, 1, 0)
+regression_result_binary <- lm(change_a_gb_tot ~ binary, data = final_data)
+summary(regression_result_binary)
+
+mean_a_killed_w <- mean(final_data$a_killed_w, na.rm = TRUE)
+mean_change <- mean(final_data$change_a_gb_tot, na.rm = TRUE)
+increase_killed_w <- 0.10 * mean_a_killed_w
+increase_change <- 0.0065 * mean_change
+ratio <- increase_change / increase_killed_w
+
+regression_result <- lm(change_gb_tot ~ a_killed_w, data = final_data)
+summary(regression_result)
+
+final_data$binary <- ifelse(final_data$a_killed_w > 0, 1, 0)
+regression_result_binary <- lm(change_gb_tot ~ binary, data = final_data)
+summary(regression_result_binary)
+
+transform_killed_w <- function(x) {
+  if (min(x) == max(x)) return(x)  # Handle the case where all values are the same
+  (x - min(x)) / (max(x) - min(x))
 }
 
-# Calculate averages for N_0 (number of Green Book establishments)
-avg_N_0 <- calc_period_avg(data, a_gb_tot)
+final_data$killed_w_transformed <- transform_killed_w(final_data$killed_w)
 
-# Calculate average casualties for the pre-treatment period
-avg_casualties_pre <- data %>%
-  filter(year <= 1941) %>%
-  group_by(stateid) %>%
-  summarise(avg_casualties = mean(a_killed_w, na.rm = TRUE))
+regression_result <- lm(change_gb_tot ~ killed_w_transformed, data = final_data)
+summary(regression_result)
 
-# Reshape the N_0 averages to wide format
-avg_N_0_wide <- avg_N_0 %>%
-  pivot_wider(names_from = period, values_from = avg, names_prefix = "N_0_")
-
-# Merge the datasets
-diff_data <- avg_N_0_wide %>%
-  left_join(avg_casualties_pre, by = "stateid")
-
-# Calculate the difference in N_0
-diff_data <- diff_data %>%
-  mutate(diff_N_0 = N_0_post - N_0_pre)
-
-# Apply asinh transformation
-diff_data <- diff_data %>%
-  mutate(
-    asinh_diff_N_0 = diff_N_0,  # Keep this transformation if desired
-    raw_avg_casualties = avg_casualties  # Use raw casualty data
-  )
-summary(diff_data$raw_avg_casualties)
-
-# Run the regression
-model <- feols(asinh_diff_N_0 ~ raw_avg_casualties, data = diff_data)
-summary(model)
-
-
-diff_data <- diff_data %>%
-  mutate(
-    norm_casualties = (raw_avg_casualties - min(raw_avg_casualties)) /
-      (max(raw_avg_casualties) - min(raw_avg_casualties))
-  )
-
-model_norm <- lm(asinh_diff_N_0 ~ norm_casualties, data = diff_data)
-summary(model_norm)
-
-library(contdid)
-res <- npiv_regression(treatment_col = "norm_casualties",
-                       outcome_col = "asinh_diff_N_0", data = diff_data)
+final_data$binary <- ifelse(final_data$killed_w_transformed > 0, 1, 0)
+regression_result_binary <- lm(change_gb_tot ~ binary, data = final_data)
+summary(regression_result_binary)
 
 # Define the cont_twfe_weights function
 cont_twfe_weights <- function(l, D) {
@@ -247,8 +279,8 @@ cont_twfe_weights <- function(l, D) {
 }
 
 # Prepare the data
-dose <- diff_data$norm_casualties
-dy <- diff_data$asinh_diff_N_0  # Using literacy as the outcome
+dose <- final_data$killed_w_transformed
+dy <- final_data$change_gb_tot
 
 dL <- min(dose[dose>0])
 dU <- max(dose)
@@ -257,18 +289,19 @@ dU <- max(dose)
 dose_grid <- seq(dL, dU, length.out=100)
 
 # Density plot of the dose
-dose_density_plot <- ggplot(data.frame(dose=dose[dose>0]), aes(x=dose)) +
-  geom_density(colour = "darkblue", linewidth = 1.2) +
+dose_density_plot <-ggplot(data.frame(dose=dose[dose>0]), aes(x=dose)) +
+  geom_density(colour = "darkblue", linewidth = 1.2, fill = "lightblue", alpha = 0.4) +
+  geom_vline(xintercept = mean(dose), colour="red", linewidth = 1, linetype = "dashed") +
   xlim(c(min(dose_grid), max(dose_grid))) +
   ylab("Density") +
-  xlab("Dose (Poveda)") +
+  xlab("Dose (Casualties)") +
   ylim(c(0,3)) +
-  labs(title="Density of Malaria Ecology (Poveda)")
-
-# print(dose_density_plot)
+  labs(title="Density of Normalised Casualties", subtitle="Red line indicates mean dose level") +
+  theme_minimal()
 
 # Calculate TWFE weights
 twfe_weights <- sapply(dose_grid, cont_twfe_weights, D=dose)
+mean_weight <- mean(twfe_weights)
 
 # Create dataframe for plotting
 plot_df <- data.frame(dose_grid = dose_grid, twfe_weights = twfe_weights)
@@ -277,19 +310,23 @@ plot_df <- data.frame(dose_grid = dose_grid, twfe_weights = twfe_weights)
 twfe_weights_plot <- ggplot(data=plot_df, aes(x = dose_grid, y = twfe_weights)) +
   geom_line(colour = "darkblue", linewidth = 1.2) +
   xlim(c(min(dose_grid), max(dose_grid))) +
-  ylab("TWFE weights") +
-  xlab("Dose (Poveda)") +
-  geom_vline(xintercept = mean(dose), colour="black", linewidth = 0.5, linetype = "dotted") +
-  ylim(c(0,3)) +
-  labs(title="TWFE weights for White Casualties")
+  ylab("TWFE Weights") +
+  xlab("Dose (Casualties)") +
+  geom_vline(xintercept = mean(twfe_weights), colour="red", linewidth = 1, linetype = "dashed") +
+  ylim(c(0, max(twfe_weights) + 0.5)) +
+  labs(title="TWFE Weights for Normalised White Casualties", subtitle="Red line indicates mean weight level") +
+  theme_minimal()
 
-# print(twfe_weights_plot)
+green_twfe <- grid.arrange(dose_density_plot, twfe_weights_plot, ncol=2)
+ggsave("/home/oddish3/Documents/uni/master-dissertation/diss/figures/green_twfe.png", green_twfe, width=12, height=6, units="in", dpi=300)
 
-library(gridExtra)
+res <- npiv_regression(treatment_col = "killed_w_transformed",
+                       outcome_col = "change_gb_tot", data = final_data)
+# Add binarised_estimate and acr_estimate to the data frames
+binarised_estimate <- res[["binarised"]][["estimate"]]
+acr_estimate <- res[["ACR_estimate"]]
 
-grid.arrange(dose_density_plot, twfe_weights_plot, ncol=2)
-
-
+# Create ATT Data Frame
 att_df <- data.frame(
   dose = res[["Xx"]],
   att = res[["hhat"]],
@@ -297,38 +334,8 @@ att_df <- data.frame(
   lower = res[["ATT_lower_UCB"]],
   se = res[["sigh"]]
 )
-# Calculate 95% CI
-att_df$ci_lower <- att_df$att - 1.96 * att_df$se
-att_df$ci_upper <- att_df$att + 1.96 * att_df$se
-att_plot <- ggplot(att_df, aes(x = dose)) +
-  # UCB (wider, lighter ribbon)
-  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "lightblue", alpha = 0.2) +
-  # 95% CI (narrower, darker ribbon)
-  geom_ribbon(aes(ymin = ci_lower, ymax = ci_upper), fill = "blue", alpha = 0.2) +
-  # ATT line
-  geom_line(aes(y = att), color = "blue", size = 1) +
-  # Zero reference line
-  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
-  labs(title = "Nonparametric Estimates of ATT(d|d)",
-       subtitle = "With 95% CI (dark blue) and Uniform Confidence Bands (light blue)",
-       x = "Malaria Ecology (Poveda)",
-       y = "Average Treatment Effect on the Treated") +
-  scale_x_continuous(labels = scales::number_format(accuracy = 0.01),
-                     breaks = scales::pretty_breaks(n = 10)) +
-  scale_y_continuous(labels = scales::number_format(accuracy = 0.01),
-                     breaks = scales::pretty_breaks(n = 10)) +
-  theme_minimal(base_size = 12) +
-  theme(
-    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
-    plot.subtitle = element_text(hjust = 0.5, size = 12),
-    axis.title = element_text(face = "bold", size = 14),
-    axis.text = element_text(size = 12),
-    panel.grid.minor = element_blank(),
-    panel.grid.major = element_line(color = "gray90"),
-    plot.margin = margin(t = 20, r = 20, b = 20, l = 20, unit = "pt"),
-    legend.position = "none"
-  )
 
+# Create ACR Data Frame
 acr_df <- data.frame(
   dose = res[["Xx"]],
   acr = res[["dhat"]],
@@ -337,28 +344,119 @@ acr_df <- data.frame(
   se = res[["sigd"]]
 )
 
-acr_plot <- ggplot(acr_df, aes(x = dose)) +
-  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "lightgreen", alpha = 0.3) +
-  geom_line(aes(y = acr), color = "darkgreen", size = 1) +
-  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
-  labs(title = "Derivative of ATT(d|d): Average Causal Response",
-       x = "Malaria Ecology (Poveda)",
-       y = "Average Causal Response") +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(hjust = 0.5, face = "bold"),
-    axis.title = element_text(face = "bold"),
-    panel.grid.minor = element_blank()
-  )
+att_df$ci_lower <- att_df$att - 1.96 * att_df$se
+att_df$ci_upper <- att_df$att + 1.96 * att_df$se
+acr_df$ci_lower <- acr_df$acr - 1.96 * acr_df$se
+acr_df$ci_upper <- acr_df$acr + 1.96 * acr_df$se
 
-print(att_plot)
-print(acr_plot)
-###
+# Function to create a clean, minimalist plot
+create_clean_plot <- function(data, y_var, y_label) {
+  ggplot(data, aes(x = dose)) +
+    # Wider confidence interval ribbon
+    geom_ribbon(aes(ymin = lower, ymax = upper), fill = "#66C2A4", alpha = 0.2) +
+    # Narrower confidence interval ribbon
+    geom_ribbon(aes(ymin = !!sym(y_var) - 1.96 * se, ymax = !!sym(y_var) + 1.96 * se),
+                fill = "#2B8C6B", alpha = 0.3) +
+    # Main effect line
+    geom_line(aes(y = !!sym(y_var)), color = "#007358", linewidth = 1) +
+    # Zero reference line
+    geom_hline(yintercept = 0, linetype = "dotted", color = "gray30", linewidth = 0.5) +
+    # Adjust x-axis to range from 0 to 1
+    scale_x_continuous(expand = c(0.01, 0), limits = c(0, 1)) +
+    scale_y_continuous(expand = c(0.01, 0)) +
+    labs(x = "Dose (Casualties)",
+         y = y_label) +
+    theme_minimal() +
+    theme(
+      plot.background = element_rect(fill = "white", color = NA),
+      panel.background = element_rect(fill = "white", color = NA),
+      panel.grid = element_blank(),
+      axis.line = element_line(color = "black", linewidth = 0.5),
+      axis.title = element_text(size = 12),  # Removed 'face = "bold"' to make axis titles normal
+      axis.text = element_text(size = 10, color = "black"),
+      plot.margin = margin(t = 20, r = 20, b = 20, l = 20, unit = "pt"),
+      legend.position = "none"
+    )
+}
 
 
+# Create ATT plot
+att_plot <- create_clean_plot(
+  att_df,
+  "att",
+  "Average Treatment Effect on\nChange in Green Book Establishments"
+)
 
+# Create ACR plot
+acr_plot <- create_clean_plot(
+  acr_df,
+  "acr",
+  "Average Causal Response on\nChange in Green Book Establishments"
+)
 
+# Save individual plots
+# ggsave(filename = "/home/oddish3/Documents/uni/master-dissertation/diss/figures/g_att_plot.png",
+#        plot = att_plot, width = 8, height = 6, dpi = 300, bg = "white")
+# ggsave(filename = "/home/oddish3/Documents/uni/master-dissertation/diss/figures/g_acr_plot.png",
+#        plot = acr_plot, width = 8, height = 6, dpi = 300, bg = "white")
 
+find_ranges <- function(dose_levels, gap = 0.01) {
+  dose_levels <- sort(dose_levels)
+  split_points <- c(0, which(diff(dose_levels) > gap), length(dose_levels))
 
+  ranges <- lapply(seq_along(split_points[-1]), function(i) {
+    range_start <- split_points[i] + 1
+    range_end <- split_points[i + 1]
+    range(dose_levels[range_start:range_end])
+  })
+
+  ranges
+}
+
+# Check for significant pointwise confidence intervals
+significant_ci <- att_df %>%
+  dplyr::filter(ci_lower > 0 | ci_upper < 0)
+
+# Check for significant UCBs
+significant_ucb <- att_df %>%
+  dplyr::filter(lower > 0 | upper < 0)
+
+# Display the dose levels where the intervals are significantly different from zero
+significant_ci_dose_levels <- significant_ci$dose
+significant_ucb_dose_levels <- significant_ucb$dose
+
+# Calculate the ranges for pointwise confidence intervals
+significant_ci_ranges <- find_ranges(significant_ci_dose_levels)
+
+# Calculate the ranges for UCBs
+significant_ucb_ranges <- find_ranges(significant_ucb_dose_levels)
+
+list(
+  significant_ci_ranges = significant_ci_ranges,
+  significant_ucb_ranges = significant_ucb_ranges
+)
+
+# Check for significant pointwise confidence intervals
+significant_ci <- acr_df %>%
+  dplyr::filter(ci_lower > 0 | ci_upper < 0)
+
+# Check for significant UCBs
+significant_ucb <- acr_df %>%
+  dplyr::filter(lower > 0 | upper < 0)
+
+# Display the dose levels where the intervals are significantly different from zero
+significant_ci_dose_levels <- significant_ci$dose
+significant_ucb_dose_levels <- significant_ucb$dose
+
+# Calculate the ranges for pointwise confidence intervals
+significant_ci_ranges <- find_ranges(significant_ci_dose_levels)
+
+# Calculate the ranges for UCBs
+significant_ucb_ranges <- find_ranges(significant_ucb_dose_levels)
+
+list(
+  significant_ci_ranges = significant_ci_ranges,
+  significant_ucb_ranges = significant_ucb_ranges
+)
 
 
