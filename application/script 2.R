@@ -16,9 +16,9 @@ data <- read_dta("application/dataverse_files/Data Files/county_gb_main.dta")
 # sort(unique(data$year))
 
 # exploratory data analysis
-dd <- data %>% filter(year >=1947& a_killed_w <1) %>% select(a_killed_w, year, county_code)
+# dd <- data %>% filter(year >=1947& a_killed_w <1) %>% select(a_killed_w, year, county_code)
 # plot(dd$a_killed_w)
-sort(unique(dd$a_killed_w_after))
+# sort(unique(dd$a_killed_w_after))
 
 
 # Define county controls
@@ -188,6 +188,24 @@ regression_table <- modelsummary(model_list,
 #   theme(legend.position = "none")
 # print(p)
 
+# data <- data %>% filter(!is.na(a_gb_tot))
+# data$event_time <- 1941
+# debugonce(event_study_npiv)
+# result <- event_study_npiv(
+#   data = data,
+#   treatment_col = "a_killed_w",
+#   outcome_col = "a_gb_tot",
+#   time_col = "year",
+#   event_time_col = "event_time",
+#   base_year = 1941,
+#   event_window = c(-2, 7),
+#   alpha = 0.05,
+#   nx = 1000,
+#   nL = 9,
+#   r = 4,
+#   M = 5
+# )
+
 # ------------------------------------------------------------
 # my did cont
 
@@ -318,10 +336,12 @@ twfe_weights_plot <- ggplot(data=plot_df, aes(x = dose_grid, y = twfe_weights)) 
   theme_minimal()
 
 green_twfe <- grid.arrange(dose_density_plot, twfe_weights_plot, ncol=2)
-ggsave("/home/oddish3/Documents/uni/master-dissertation/diss/figures/green_twfe.png", green_twfe, width=12, height=6, units="in", dpi=300)
+# ggsave("/home/oddish3/Documents/uni/master-dissertation/diss/figures/green_twfe.png", green_twfe, width=12, height=6, units="in", dpi=300)
 
+# debugonce(npiv_regression)
 res <- npiv_regression(treatment_col = "killed_w_transformed",
                        outcome_col = "change_gb_tot", data = final_data)
+
 # Add binarised_estimate and acr_estimate to the data frames
 binarised_estimate <- res[["binarised"]][["estimate"]]
 acr_estimate <- res[["ACR_estimate"]]
@@ -459,4 +479,126 @@ list(
   significant_ucb_ranges = significant_ucb_ranges
 )
 
+
+# Step 1: Calculate change in gb_tot relative to 1941
+calculate_change <- function(data) {
+  base_year <- 1941
+
+  # Calculate base values for each county_code in 1941
+  base_values <- data %>%
+    filter(year == base_year) %>%
+    select(county_code, gb_tot) %>%
+    rename(base_gb_tot = gb_tot)
+
+  data %>%
+    left_join(base_values, by = "county_code") %>%
+    group_by(county_code, year) %>%
+    reframe(change_gb_tot = gb_tot - base_gb_tot) %>%
+    arrange(county_code, year)
+}
+
+change_data <- calculate_change(data)
+
+# Step 2: Merge with killed_w data
+final_data <- data %>%
+  left_join(change_data, by = c("county_code", "year"), relationship = "many-to-many") %>%
+  select(county_code, year, killed_w, change_gb_tot)
+
+# Step 3: Transform killed_w variable
+transform_killed_w <- function(x) {
+  if (min(x) == max(x)) return(x)  # Handle the case where all values are the same
+  (x - min(x)) / (max(x) - min(x))
+}
+final_data <- final_data %>% filter(!is.na(killed_w) & !is.na(change_gb_tot))
+final_data$killed_w_transformed <- transform_killed_w(final_data$killed_w)
+
+years <- sort(unique(final_data$year))
+years <- setdiff(years, 1941)
+
+# Initialize a list to store results
+results <- list()
+
+# Run npiv_regression for each year
+for (year in years) {
+  # Subset the data for the current year and all previous years
+  subset_data <- final_data[final_data$year == year, ]
+
+  # Run the regression
+  model <- npiv_regression(treatment_col = "killed_w_transformed",
+                           outcome_col = "change_gb_tot",
+                           data = subset_data)
+
+  # Store the result
+  results[[as.character(year)]] <- model
+
+  # Print progress (optional)
+  cat("Completed regression for year:", year, "\n")
+}
+
+all_objects <- ls()
+keep_object <- c("results", "years")
+rm(list = setdiff(all_objects, keep_object))
+
+# Initialize empty data frames
+df_binary <- data.frame(year = integer(), estimate = numeric(), se = numeric())
+df_acr <- data.frame(year = integer(), estimate = numeric(), se = numeric())
+
+# Iterate through years and extract data
+for (year in years) {
+  year_key <- as.character(year)
+
+  # Binary estimates
+  binary_estimate <- results[[year_key]][["binarised"]][["estimate"]][["binary"]]
+  binary_se <- results[[year_key]][["binarised"]][["std_error"]][["binary"]]
+  df_binary <- rbind(df_binary, data.frame(year = as.integer(year),
+                                           estimate = binary_estimate,
+                                           se = binary_se))
+
+  # ACR estimates
+  acr_estimate <- results[[year_key]][["ACR_estimate"]]
+  acr_se <- results[[year_key]][["se_ACR"]]
+  df_acr <- rbind(df_acr, data.frame(year = as.integer(year),
+                                     estimate = acr_estimate,
+                                     se = acr_se))
+}
+
+# Function to create event study plot
+create_es_plot <- function(df) {
+  ggplot(df, aes(x = year, y = estimate)) +
+    geom_point(size = 2, color = "black") +
+    geom_errorbar(aes(ymin = estimate - 1.96 * se, ymax = estimate + 1.96 * se),
+                  width = 0.2, color = "black") +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+    geom_rect(aes(xmin = 1942, xmax = 1946, ymin = -Inf, ymax = Inf),
+              fill = "gray90", alpha = 0.5) +
+    annotate("point", x = 1941, y = 0, color = "red", size = 3, shape = 18) +
+    scale_x_continuous(breaks = seq(min(df$year), max(df$year), by = 5)) +
+    theme_cowplot() +
+    labs(x = "Year",
+         y = "Estimate") +
+    theme(
+      legend.position = "bottom",
+      axis.title = element_text(size = 12),
+      axis.text = element_text(size = 10),
+      legend.title = element_text(size = 10),
+      legend.text = element_text(size = 9),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      axis.line = element_line(colour = "black"),  # Add this line
+      panel.border = element_blank(),  # Change this line
+      panel.background = element_blank()  # Add this line
+    )
+}
+
+# Create plots
+plot_binary <- create_es_plot(df_binary)
+plot_acr <- create_es_plot(df_acr)
+
+# Display plots
+print(plot_binary)
+print(plot_acr)
+
+# Optionally, save plots
+ggsave("/home/oddish3/Documents/uni/master-dissertation/diss/figures/binary_event_study.png", plot_binary, width=12, height=6, units="in", dpi=300)
+ggsave("/home/oddish3/Documents/uni/master-dissertation/diss/figures/acr_event_study.png", plot_acr, width=12, height=6, units="in", dpi=300)
 

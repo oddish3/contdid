@@ -103,6 +103,7 @@ npiv_regression <- function(data,
   tryCatch({
     Jhat_result <- jhat(PP, PP, CJ, CJ, TJ, M, n, nL)
     Lhat <- Jhat_result$LL
+    # browser()
     # write_debug_info(paste("Jhat computed. Lhat =", Lhat))
   }, error = function(e) {
     # write_debug_info(paste("Error in jhat computation:", e$message))
@@ -402,8 +403,8 @@ npiv_regression <- function(data,
   # Return results
   # browser()
   list(
-    x = x,
-    y = y,
+    # x = x,
+    # y = y,
     Xx = Xx_sub,
     TJ = TJ,
     Llep = Llep,

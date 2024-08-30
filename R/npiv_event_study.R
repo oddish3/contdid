@@ -1,3 +1,26 @@
+#' Event Study Nonparametric Instrumental Variable (NPIV) Function
+#'
+#' This function performs an event study using a nonparametric instrumental variable regression.
+#'
+#' @param data A data frame containing the data.
+#' @param treatment_col Name of the treatment column as a string.
+#' @param outcome_col Name of the outcome column as a string.
+#' @param time_col Name of the time column as a string.
+#' @param event_time_col Name of the event time column as a string.
+#' @param id_col (Optional) Name of the ID column as a string.
+#' @param base_year Base year for the event study (default is 1983).
+#' @param event_window A vector specifying the time window around the event (default is c(-3, 3)).
+#' @param alpha Significance level for confidence intervals (default is 0.05).
+#' @param nx Number of grid points for the nonparametric regression (default is 1000).
+#' @param nL Number of terms in the series (default is 9).
+#' @param r Resolution level (default is 4).
+#' @param M Smoothing parameter (default is 5).
+#' @return A list containing the event study results and the filtered data.
+#' @export
+#'
+#' @examples
+#' # Example usage
+#' result <- event_study_npiv(data, "treatment", "outcome", "time", "event_time")
 event_study_npiv <- function(data,
                              treatment_col,
                              outcome_col,
