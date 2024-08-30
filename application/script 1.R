@@ -339,18 +339,18 @@ plot_to_save <- results[["poveda_dlit"]][["dose_twfe_plot"]]
 ggsave(
   filename = "/home/oddish3/Documents/uni/master-dissertation/diss/figures/povedatw.png",  # or .pdf, .jpg, etc.
   plot = plot_to_save,
-  width = 12,  # Adjust as needed
-  height = 6,  # Adjust as needed
+  width = 12,
+  height = 6,
   units = "in",
   dpi = 300
 )
 
 plot_to_sav2 <- results[["poveda_dlit"]][["att_plot"]]
 ggsave(
-  filename = "/home/oddish3/Documents/uni/master-dissertation/diss/figures/povedaatt.png",  # or .pdf, .jpg, etc.
+  filename = "/home/oddish3/Documents/uni/master-dissertation/diss/figures/povedaatt.png",
   plot = plot_to_sav2,
-  width = 12,  # Adjust as needed
-  height = 6,  # Adjust as needed
+  width = 12,
+  height = 6,
   units = "in",
   dpi = 300
 )
