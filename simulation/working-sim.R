@@ -51,7 +51,7 @@ for (dgp in 1:4) {
 # Stop cluster
 stopCluster(cl)
 toc()
-saveRDS(results_list, file = "simulation/results_list2.rds")
+# saveRDS(results_list, file = "simulation/results_list2.rds")
 # Combine all results into a single data frame
 all_results <- do.call(rbind, results_list)
 

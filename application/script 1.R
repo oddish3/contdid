@@ -164,13 +164,11 @@ data$mell <- ifelse(data$mell > 1, 1, data$mell)
 data <- data %>% filter(!is.na(poveda & dsch) & poveda < 1)
 
 perform_analysis <- function(dose_var, dep_var, final_data) {
-  cont_twfe_weights <- function(l, D) {
-    wt <- ( ( mean(D[D >= l]) - mean(D) ) * mean(1 * (D >= l)) ) / var(D)
-    wt
-  }
-
   dose <- final_data[[dose_var]]
   dy <- final_data[[dep_var]]
+
+  twfe_formula <- as.formula(paste(dep_var, "~", dose_var))
+  twfe <- feols(twfe_formula, data = final_data, weights = ~wtbpl, vcov = "HC1")
 
   dL <- min(dose[dose > 0])
   dU <- max(dose)
@@ -202,9 +200,9 @@ perform_analysis <- function(dose_var, dep_var, final_data) {
     xlim(c(min(dose_grid), max(dose_grid))) +
     ylab("TWFE Weights") +
     xlab("Dose (Malaria Index)") +
-    geom_vline(xintercept = mean(twfe_weights), colour = "red", linewidth = 1, linetype = "dashed") +
+    geom_vline(xintercept = mean(dose), colour = "red", linewidth = 1, linetype = "dashed") +
     ylim(c(0, max(twfe_weights) + 0.5)) +
-    labs(title = paste("TWFE Weights for ", dose_var), subtitle = "Red line indicates mean weight level") +
+    labs(title = paste("TWFE Weights for ", dose_var), subtitle = "Red line indicates mean dose level") +
     theme_minimal()
 
   # Combine plots (can be commented out if not needed)
@@ -234,30 +232,6 @@ perform_analysis <- function(dose_var, dep_var, final_data) {
   att_df$ci_upper <- att_df$att + 1.96 * att_df$se
   acr_df$ci_lower <- acr_df$acr - 1.96 * acr_df$se
   acr_df$ci_upper <- acr_df$acr + 1.96 * acr_df$se
-
-  # Function to create a clean, minimalist plot
-  create_clean_plot <- function(data, y_var, y_label) {
-    ggplot(data, aes(x = dose)) +
-      geom_ribbon(aes(ymin = lower, ymax = upper), fill = "#66C2A4", alpha = 0.2) +
-      geom_ribbon(aes(ymin = !!sym(y_var) - 1.96 * se, ymax = !!sym(y_var) + 1.96 * se),
-                  fill = "#2B8C6B", alpha = 0.3) +
-      geom_line(aes(y = !!sym(y_var)), color = "#007358", linewidth = 1) +
-      geom_hline(yintercept = 0, linetype = "dotted", color = "gray30", linewidth = 0.5) +
-      scale_x_continuous(expand = c(0.01, 0), limits = c(0, 1)) +
-      scale_y_continuous(expand = c(0.01, 0)) +
-      labs(x = "Dose (Malaria Index)", y = y_label) +
-      theme_minimal() +
-      theme(
-        plot.background = element_rect(fill = "white", color = NA),
-        panel.background = element_rect(fill = "white", color = NA),
-        panel.grid = element_blank(),
-        axis.line = element_line(color = "black", linewidth = 0.5),
-        axis.title = element_text(size = 12),
-        axis.text = element_text(size = 10, color = "black"),
-        plot.margin = margin(t = 20, r = 20, b = 20, l = 20, unit = "pt"),
-        legend.position = "none"
-      )
-  }
 
   # Create ATT and ACR plots
   att_plot <- create_clean_plot(att_df, "att", "Average Treatment Effect on\nChange in Dependent Variable")
@@ -291,6 +265,7 @@ perform_analysis <- function(dose_var, dep_var, final_data) {
 
   # Return the results as a list for inspection
   list(
+    twfe = twfe,
     dose_twfe_plot = green_twfe,
     att_plot = att_plot,
     acr_plot = acr_plot,
@@ -300,6 +275,40 @@ perform_analysis <- function(dose_var, dep_var, final_data) {
     significant_ucb_ranges_acr = significant_ucb_ranges_acr,
     res = res["summary"]
   )
+}
+
+cont_twfe_weights <- function(l, D) {
+  # Estimate density function
+  density_obj <- density(D)
+  fD <- function(x) {
+    approx(density_obj$x, density_obj$y, xout = x, yleft = 0, yright = 0)$y
+  }
+
+  # Calculate weight
+  (l - mean(D)) / var(D) * fD(l)
+}
+
+create_clean_plot <- function(data, y_var, y_label) {
+  ggplot(data, aes(x = dose)) +
+    geom_ribbon(aes(ymin = lower, ymax = upper), fill = "#66C2A4", alpha = 0.2) +
+    geom_ribbon(aes(ymin = !!sym(y_var) - 1.96 * se, ymax = !!sym(y_var) + 1.96 * se),
+                fill = "#2B8C6B", alpha = 0.3) +
+    geom_line(aes(y = !!sym(y_var)), color = "#007358", linewidth = 1) +
+    geom_hline(yintercept = 0, linetype = "dotted", color = "gray30", linewidth = 0.5) +
+    scale_x_continuous(expand = c(0.01, 0), limits = c(0, 1)) +
+    scale_y_continuous(expand = c(0.01, 0)) +
+    labs(x = "Dose (Malaria Index)", y = y_label) +
+    theme_minimal() +
+    theme(
+      plot.background = element_rect(fill = "white", color = NA),
+      panel.background = element_rect(fill = "white", color = NA),
+      panel.grid = element_blank(),
+      axis.line = element_line(color = "black", linewidth = 0.5),
+      axis.title = element_text(size = 12),
+      axis.text = element_text(size = 10, color = "black"),
+      plot.margin = margin(t = 20, r = 20, b = 20, l = 20, unit = "pt"),
+      legend.position = "none"
+    )
 }
 
 find_ranges <- function(dose_levels, gap = 0.01) {
@@ -326,10 +335,22 @@ for (dep_var in dep_vars) {
     results[[result_key]] <- perform_analysis(dose_var, dep_var, data)
   }
 }
+plot_to_save <- results[["poveda_dlit"]][["dose_twfe_plot"]]
+ggsave(
+  filename = "/home/oddish3/Documents/uni/master-dissertation/diss/figures/povedatw.png",  # or .pdf, .jpg, etc.
+  plot = plot_to_save,
+  width = 12,  # Adjust as needed
+  height = 6,  # Adjust as needed
+  units = "in",
+  dpi = 300
+)
 
-
-# print(att_plot)
-# ggsave(att_plot, file = "/home/oddish3/Documents/uni/master-dissertation/diss/figures/malatt.png")
-# res[["binarised"]]
-# ggsave(acr_plot, file = "/home/oddish3/Documents/uni/master-dissertation/diss/figures/malacr.png")
-# print(acr_plot)
+plot_to_sav2 <- results[["poveda_dlit"]][["att_plot"]]
+ggsave(
+  filename = "/home/oddish3/Documents/uni/master-dissertation/diss/figures/povedaatt.png",  # or .pdf, .jpg, etc.
+  plot = plot_to_sav2,
+  width = 12,  # Adjust as needed
+  height = 6,  # Adjust as needed
+  units = "in",
+  dpi = 300
+)

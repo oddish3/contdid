@@ -119,6 +119,45 @@ regression_table <- modelsummary(model_list,
 
 # Print LaTeX code
 # cat(regression_table)
+calculate_change <- function(data) {
+  base_year <- 1941
+  base_values <- data %>%
+    filter(year == base_year) %>%
+    select(county_code, gb_tot) %>%
+    rename(base_gb_tot = gb_tot)
+
+  data %>%
+    left_join(base_values, by = "county_code") %>%
+    group_by(county_code, year) %>%
+    reframe(change_gb_tot = gb_tot - base_gb_tot) %>%
+    arrange(county_code, year)
+}
+
+# Calculate change data
+change_data <- calculate_change(data)
+
+# Prepare the final dataset
+final_data <- data %>%
+  left_join(change_data, by = c("county_code", "year"), relationship = "many-to-many") %>%
+  mutate(
+    killed_w_binary = ifelse(killed_w > 0, 1, 0),
+    post_1948 = ifelse(year >= 1948, 1, 0),
+    killed_w_binary_post = killed_w_binary * post_1948
+  ) %>%
+  select(county_code, year, killed_w_binary, post_1948, killed_w_binary_post, change_gb_tot, stateid)
+
+# Remove rows with NA values
+final_data <- final_data %>%
+  filter(!is.na(killed_w_binary) & !is.na(change_gb_tot))
+
+# Run the modified model 5
+model5_modified <- feols(change_gb_tot ~ killed_w_binary_post | county_code + stateid^year,
+                         data = final_data,
+                         cluster = "county_code")
+
+# Summary of the model
+summary(model5_modified)
+
 
 ######
 
@@ -269,12 +308,12 @@ increase_killed_w <- 0.10 * mean_a_killed_w
 increase_change <- 0.0065 * mean_change
 ratio <- increase_change / increase_killed_w
 
-regression_result <- lm(change_gb_tot ~ a_killed_w, data = final_data)
+regression_result <- lm(change_gb_tot ~ killed_w, data = final_data)
 summary(regression_result)
 
-final_data$binary <- ifelse(final_data$a_killed_w > 0, 1, 0)
-regression_result_binary <- lm(change_gb_tot ~ binary, data = final_data)
-summary(regression_result_binary)
+# final_data$binary <- ifelse(final_data$a_killed_w > 0, 1, 0)
+# regression_result_binary <- lm(change_gb_tot ~ binary, data = final_data)
+# summary(regression_result_binary)
 
 transform_killed_w <- function(x) {
   if (min(x) == max(x)) return(x)  # Handle the case where all values are the same
@@ -330,9 +369,9 @@ twfe_weights_plot <- ggplot(data=plot_df, aes(x = dose_grid, y = twfe_weights)) 
   xlim(c(min(dose_grid), max(dose_grid))) +
   ylab("TWFE Weights") +
   xlab("Dose (Casualties)") +
-  geom_vline(xintercept = mean(twfe_weights), colour="red", linewidth = 1, linetype = "dashed") +
+  geom_vline(xintercept = mean(dose), colour="red", linewidth = 1, linetype = "dashed") +
   ylim(c(0, max(twfe_weights) + 0.5)) +
-  labs(title="TWFE Weights for Normalised White Casualties", subtitle="Red line indicates mean weight level") +
+  labs(title="TWFE Weights for Normalised White Casualties", subtitle="Red line indicates mean dose level") +
   theme_minimal()
 
 green_twfe <- grid.arrange(dose_density_plot, twfe_weights_plot, ncol=2)
@@ -599,6 +638,6 @@ print(plot_binary)
 print(plot_acr)
 
 # Optionally, save plots
-ggsave("/home/oddish3/Documents/uni/master-dissertation/diss/figures/binary_event_study.png", plot_binary, width=12, height=6, units="in", dpi=300)
-ggsave("/home/oddish3/Documents/uni/master-dissertation/diss/figures/acr_event_study.png", plot_acr, width=12, height=6, units="in", dpi=300)
+# ggsave("/home/oddish3/Documents/uni/master-dissertation/diss/figures/binary_event_study.png", plot_binary, width=12, height=6, units="in", dpi=300)
+# ggsave("/home/oddish3/Documents/uni/master-dissertation/diss/figures/acr_event_study.png", plot_acr, width=12, height=6, units="in", dpi=300)
 
