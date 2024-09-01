@@ -69,6 +69,11 @@ summary(res)
 
 The output of `summary(res)` will provide you with the details of the regression, allowing you to make inferences about the causal impact of `killed_w_transformed` on `change_gb_tot`.
 
+### Replicating replication 1 & 2.
+Script 1 in the repository replicates the analysis using data from \url{https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/NXFB5R}.
+Script 2 in the repository replicate the analysis using data from \url{https://www.openicpsr.org/openicpsr/project/113746/version/V1/view}.
+
+
 ## Conclusion
 
 The `npiv_regression` function is a powerful tool for estimating the causal effects in the presence of endogenous treatment variables. By specifying the treatment and outcome variables, you can gain insights into complex relationships within your data.
