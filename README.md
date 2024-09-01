@@ -1,4 +1,3 @@
-
 # `npiv_regression`: Nonparametric Instrumental Variables Regression
 
 ## Overview
@@ -10,14 +9,11 @@ The `npiv_regression` function performs a nonparametric instrumental variables r
 Before using the `npiv_regression` function, make sure you have installed and loaded the required package. You can install it from CRAN or GitHub if it's part of a custom package:
 
 ```r
-# Install from CRAN
-install.packages("your_package_name")
-
-# or if the package is hosted on GitHub
-devtools::install_github("your_username/your_package_name")
+# Download the package
+devtools::install_github("oddish3/contdid")
 
 # Load the package
-library(your_package_name)
+library(contdid)
 ```
 
 ## Usage
@@ -32,7 +28,7 @@ npiv_regression(treatment_col, outcome_col, data)
 
 ### Parameters
 
-- `treatment_col`: A string representing the name of the treatment variable in the dataset. This is the endogenous variable for which you want to estimate the causal effect.
+- `treatment_col`: A string representing the name of the dosage variable in the dataset. This is the variable for which you want to estimate the causal effect, make sure all values are between 0 and 1. 
 - `outcome_col`: A string representing the name of the outcome variable in the dataset. This is the dependent variable whose relationship with the treatment you want to study.
 - `data`: A data frame containing the variables specified in `treatment_col` and `outcome_col`.
 
