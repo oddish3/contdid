@@ -2,12 +2,10 @@
 
 ## Overview
 
-The `npiv_regression` function performs the NPIV procedure from 
-https://academic.oup.com/restud/advance-article-abstract/doi/10.1093/restud/rdae025/7624036?redirectedFrom=fulltext
-in a DiD contextt as in https://arxiv.org/abs/2107.02637
+The `npiv_regression` function performs the non-parametric regression procedure as described by Chen et al. (2023)](https://academic.oup.com/restud/advance-article-abstract/doi/10.1093/restud/rdae025/7624036?redirectedFrom=fulltext) in a Difference-in-Differences (DiD) context, as detailed in: [Callaway et al. (2024)](https://arxiv.org/abs/2107.02637)
 
-This was for a Masters Dissertation project, I have realised this is also implemented in R at
-https://github.com/JeffreyRacine/npiv
+This implementation was part of a Master's dissertation project. I have since realised that a similar implementation is available in R at [Jeffrey Racine's GitHub repository](https://github.com/JeffreyRacine/npiv).
+
 
 ## Installation
 
