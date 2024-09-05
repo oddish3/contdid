@@ -6,6 +6,9 @@ The `npiv_regression` function performs the NPIV procedure from
 https://academic.oup.com/restud/advance-article-abstract/doi/10.1093/restud/rdae025/7624036?redirectedFrom=fulltext
 in a DiD contextt as in https://arxiv.org/abs/2107.02637
 
+This was for a Masters Dissertation project, I have realised this is also implemented in R at
+https://github.com/JeffreyRacine/npiv
+
 ## Installation
 
 Before using the `npiv_regression` function, make sure you have installed and loaded the required package. You can install it from CRAN or GitHub if it's part of a custom package:
